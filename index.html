@@ -247,6 +247,12 @@ textarea.inp{resize:vertical;min-height:80px;line-height:1.5}
 .btn-ghost{background:var(--surface-2);color:var(--ink-2);flex:0 0 auto;padding:15px 20px}
 .btn-danger{background:#fef1ec;color:var(--red);flex:0 0 auto;padding:15px 18px}
 
+.app-foot{text-align:center;font-size:10.5px;font-weight:500;color:var(--ink-3);padding:22px 16px 4px;opacity:.75}
+#topBtn{position:fixed;bottom:calc(130px + var(--safe-b));right:calc(50% - 260px + 24px);z-index:54;width:44px;height:44px;border-radius:14px;background:rgba(255,255,255,.95);border:1px solid var(--line);color:var(--medit);display:none;place-items:center;box-shadow:var(--shadow-lg)}
+#topBtn.show{display:grid}
+@media(max-width:556px){#topBtn{right:24px}}
+.more-btn{width:100%;padding:14px;border-radius:13px;background:var(--surface);border:1.5px dashed #b9cdfb;color:var(--medit);font-size:14px;font-weight:700;margin:2px 0 10px}
+.more-btn:active{background:var(--medit-050)}
 .toast{position:fixed;bottom:calc(90px + var(--safe-b));left:50%;transform:translateX(-50%) translateY(20px);z-index:200;
   background:var(--ink);color:#fff;padding:12px 20px;border-radius:99px;font-size:13.5px;font-weight:600;
   opacity:0;pointer-events:none;transition:.3s;box-shadow:var(--shadow-lg);white-space:nowrap}
@@ -417,6 +423,8 @@ textarea.inp{resize:vertical;min-height:80px;line-height:1.5}
     </div>
   </section>
 
+  <footer class="app-foot">Copyright © 2026 MEDIT Corp. All rights reserved.</footer>
+
   <!-- BOTTOM NAV -->
   <nav class="tabbar">
     <button class="tab on" data-view="dash">
@@ -437,6 +445,10 @@ textarea.inp{resize:vertical;min-height:80px;line-height:1.5}
   </button>
 
 </div>
+
+<button id="topBtn" aria-label="맨 위로" onclick="window.scrollTo({top:0,behavior:'smooth'})">
+  <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 14V4M4 9l5-5 5 5"/></svg>
+</button>
 
 <!-- SHEET -->
 <div class="scrim" id="scrim"></div>
@@ -504,6 +516,8 @@ function uid(){ return "v"+Date.now().toString(36)+Math.floor(performance.now())
 let fTypes=[], fPerson="전체", fStatus="전체", q="", editId=null, selProducts=[], fMonth="", fDay="", curMonth="", sortDesc=true, trendMode="M";
 let ME="";
 let fPeriod="전체", fFrom="", fTo="";
+let listLimit=30;
+function moreList(){ listLimit+=60; renderList(false); }
 const LEADER="박찬욱";
 function setMe(v){ ME=v; fPerson=(v&&v!==LEADER)?v:"전체"; save(); renderAll(); toast(v===LEADER?"박찬욱 Director · 팀 전체 보기":v+" 님 기준으로 보기"); }
 function isLeaderView(){ return !ME || ME===LEADER; }
@@ -659,7 +673,8 @@ function filtered(){
 function fmtDate(d){ if(!d)return""; const dt=new Date(d+"T00:00:00"); const w=["일","월","화","수","목","금","토"][dt.getDay()];
   return `${d.slice(5,7)}.${d.slice(8,10)} (${w})`; }
 
-function renderList(){
+function renderList(resetLimit){
+  if(resetLimit!==false) listLimit=30;
   const rows=filtered();
   const perLabel = (fFrom||fTo)?(fPeriod!=="직접선택"&&fPeriod!=="전체"?fPeriod:`${fFrom?fFrom.slice(5).replace("-","."):""}~${fTo?fTo.slice(5).replace("-","."):""}`):"";
   const monthLabel = fDay?`${+fDay.slice(5,7)}월 ${+fDay.slice(8,10)}일`:(fMonth?`${fMonth.slice(0,4)}년 ${+fMonth.slice(5,7)}월`:perLabel);
@@ -672,7 +687,8 @@ function renderList(){
   if(!rows.length){ el.innerHTML=`<div class="empty">
     <svg width="46" height="46" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="20" cy="20" r="15"/><path d="m32 32 8 8M14 20h12M20 14v12" opacity=".5"/></svg>
     <p>검색 결과가 없어요</p><p class="s">필터를 바꾸거나 새 방문을 추가해 보세요</p></div>`; return; }
-  el.innerHTML=rows.map(r=>{
+  const shown=rows.slice(0,listLimit);
+  el.innerHTML=shown.map(r=>{
     const t=typeMeta(r.type);
     const prods=prodList(r.product).map(p=>`<span class="tag prod">${esc(p)}</span>`).join("");
     const deal=r.contract?`<span class="tag deal">✓ ${esc(r.contract)}</span>`:"";
@@ -692,7 +708,8 @@ function renderList(){
       ${r.dealer?`<div class="vc-dealer">🤝 ${esc(r.dealer)}</div>`:""}
       ${r.note?`<div class="vc-note">${esc(r.note)}</div>`:""}
     </div>`;
-  }).join("");
+  }).join("")
+  +(rows.length>listLimit?`<button class="more-btn" onclick="moreList()">더 보기 (${rows.length-listLimit}건 남음)</button>`:"");
 }
 
 /* ============ SHEET (add / edit) ============ */
@@ -931,6 +948,9 @@ document.getElementById("sheetClose").onclick=closeSheet;
 scrim.onclick=closeSheet;
 document.getElementById("search").oninput=e=>{q=e.target.value;renderList();};
 
+window.addEventListener("scroll",()=>{
+  document.getElementById("topBtn").classList.toggle("show", window.scrollY>600);
+},{passive:true});
 let toastT;
 function toast(msg){const el=document.getElementById("toast");el.textContent=msg;el.classList.add("show");clearTimeout(toastT);toastT=setTimeout(()=>el.classList.remove("show"),1900);}
 
