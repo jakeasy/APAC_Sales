@@ -519,12 +519,12 @@ let fPeriod="전체", fFrom="", fTo="";
 let listLimit=30;
 function moreList(){ listLimit+=60; renderList(false); }
 const LEADER="박찬욱";
-function setMe(v){ ME=v; fPerson=(v&&v!==LEADER)?v:"전체"; save(); renderAll(); toast(v===LEADER?"박찬욱 Director · 팀 전체 보기":v+" 님 기준으로 보기"); }
+function setMe(v){ ME=v; fPerson=(v&&v!==LEADER)?v:"전체"; save(); renderAll(); toast(v===LEADER?"팀 전체 보기":v+" 님 기준으로 보기"); }
 function isLeaderView(){ return !ME || ME===LEADER; }
 function viewRows(){ return isLeaderView()? DATA : DATA.filter(r=>r.person===ME); }
 function renderMeSel(){
   const sel=document.getElementById("meSel"); if(!sel) return;
-  sel.innerHTML=`<option value="${LEADER}" ${isLeaderView()?"selected":""}>${LEADER} (Director)</option>`
+  sel.innerHTML=`<option value="${LEADER}" ${isLeaderView()?"selected":""}>전체</option>`
     +allPeople().map(p=>`<option value="${p}" ${ME===p?"selected":""}>${p}</option>`).join("");
 }
 
