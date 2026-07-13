@@ -30,6 +30,7 @@
   --shadow-lg:0 12px 40px -12px rgba(16,32,31,.28);
   --r:16px; --r-sm:11px;
   --safe-b:env(safe-area-inset-bottom,0px);
+  --safe-t:env(safe-area-inset-top,0px);
 }
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{height:100%}
@@ -51,7 +52,7 @@ input,select,textarea{font-family:inherit;font-size:16px;color:var(--ink)}
 .appbar{
   position:sticky;top:0;z-index:40;
   background:linear-gradient(155deg,#0a5bff 0%,#0032a0 100%);
-  color:#fff;padding:16px 20px 18px;
+  color:#fff;padding:calc(16px + var(--safe-t)) 20px 18px;
   border-radius:0 0 22px 22px;
   box-shadow:0 8px 24px -14px rgba(0,50,160,.9);
 }
