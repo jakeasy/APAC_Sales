@@ -1,0 +1,796 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#004FEC">
+<title>고객 방문 관리 · Korea Team</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<style>
+:root{
+  --bg:#f4f6f7; --surface:#ffffff; --surface-2:#f8fafa;
+  --ink:#10201f; --ink-2:#4a5c5a; --ink-3:#8595938;
+  --line:#e4e9e9; --line-2:#eef2f2;
+  --teal:#004fec; --teal-600:#1a63f5; --teal-050:#e6efff;
+  --medit:#004fec; --medit-d:#0040c4; --medit-dd:#0033a0; --medit-050:#e6efff;
+  --blue:#1f6bb8; --blue-050:#e8f1fa;
+  --amber:#b45309; --amber-050:#fbf1e3;
+  --gray:#5b6b69; --gray-050:#eef1f1;
+  --violet:#6d54b5; --violet-050:#efeafa;
+  --green:#15803d; --red:#c2410c;
+  --shadow:0 1px 2px rgba(16,32,31,.04),0 6px 20px -8px rgba(16,32,31,.12);
+  --shadow-lg:0 12px 40px -12px rgba(16,32,31,.28);
+  --r:16px; --r-sm:11px;
+  --safe-b:env(safe-area-inset-bottom,0px);
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%}
+body{
+  font-family:"Pretendard Variable",Pretendard,-apple-system,sans-serif;
+  background:var(--bg); color:var(--ink);
+  font-size:15px; line-height:1.5; letter-spacing:-.01em;
+  -webkit-font-smoothing:antialiased;
+  overscroll-behavior-y:none;
+}
+button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit}
+input,select,textarea{font-family:inherit;font-size:16px;color:var(--ink)}
+.tnum{font-variant-numeric:tabular-nums;font-feature-settings:"tnum"}
+
+/* ============ APP SHELL ============ */
+#app{max-width:520px;margin:0 auto;min-height:100vh;background:var(--bg);position:relative;padding-bottom:calc(76px + var(--safe-b))}
+
+/* Header */
+.appbar{
+  position:sticky;top:0;z-index:40;
+  background:linear-gradient(155deg,#0a5bff 0%,#0032a0 100%);
+  color:#fff;padding:16px 20px 18px;
+  border-radius:0 0 22px 22px;
+  box-shadow:0 8px 24px -14px rgba(0,50,160,.9);
+}
+.appbar-top{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.brand{display:flex;align-items:center;gap:11px}
+.brand-logo{background:#fff;padding:9px 12px;border-radius:10px;box-shadow:0 2px 10px rgba(0,0,0,.16);display:flex;align-items:center;line-height:0}
+.brand-logo svg{height:18px;width:auto;display:block}
+.brand h1{font-size:16px;font-weight:700;letter-spacing:-.02em;line-height:1.1}
+.brand p{font-size:11.5px;opacity:.82;font-weight:500;margin-top:1px}
+.appbar-badge{font-size:11px;font-weight:600;background:rgba(255,255,255,.15);padding:5px 10px;border-radius:99px}
+
+/* View sections */
+.view{display:none;animation:fade .22s ease}
+.view.active{display:block}
+@keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.pad{padding:18px 16px}
+.section-t{font-size:12.5px;font-weight:700;color:var(--ink-3);text-transform:uppercase;letter-spacing:.04em;margin:22px 4px 10px}
+.section-t:first-child{margin-top:4px}
+
+/* ============ DASHBOARD ============ */
+.hero-sub{display:flex;align-items:baseline;justify-content:space-between;margin:2px 4px 14px}
+.hero-sub .m{font-size:19px;font-weight:800;letter-spacing:-.02em}
+.hero-sub .s{font-size:12.5px;color:var(--ink-3);font-weight:600}
+.kpi-grid{display:grid;grid-template-columns:1fr 1fr;gap:11px}
+.kpi{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:15px 15px 14px;box-shadow:var(--shadow);position:relative;overflow:hidden;cursor:pointer;transition:transform .1s,box-shadow .2s}
+.kpi:active{transform:scale(.97)}
+.kpi:hover{box-shadow:0 2px 4px rgba(16,32,31,.06),0 10px 26px -10px rgba(27,79,217,.28)}
+.kpi::before{content:"";position:absolute;left:0;top:14px;bottom:14px;width:3px;border-radius:3px;background:var(--acc,var(--teal))}
+.kpi .lab{font-size:12px;color:var(--ink-2);font-weight:600;display:flex;align-items:center;justify-content:space-between;gap:6px}
+.kpi-arrow{color:var(--acc,var(--ink-3));font-size:17px;font-weight:800;opacity:.55;line-height:1}
+.kpi .val{font-size:30px;font-weight:800;letter-spacing:-.03em;margin-top:5px;line-height:1}
+.kpi .val small{font-size:14px;font-weight:600;color:var(--ink-3);margin-left:3px}
+.kpi .sub{font-size:11.5px;color:var(--ink-3);font-weight:500;margin-top:4px}
+
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow)}
+.panel{padding:16px 16px 18px;margin-top:11px}
+.panel-h{font-size:14px;font-weight:700;margin-bottom:14px;display:flex;justify-content:space-between;align-items:center}
+.panel-h .hint{font-size:11.5px;color:var(--ink-3);font-weight:500}
+
+/* bar rows */
+.bar-row{display:flex;align-items:center;gap:10px;margin-bottom:11px;padding:3px 4px;border-radius:9px}
+.bar-row:last-child{margin-bottom:0}
+.bar-row.clk{cursor:pointer;transition:background .12s}
+.bar-row.clk:active{background:var(--surface-2)}
+.row-chev{font-size:16px;font-weight:800;color:var(--ink-3);opacity:.45;flex-shrink:0;width:10px}
+.tap-hint{font-size:11px;color:var(--ink-3);font-weight:600;margin-top:12px;text-align:right;opacity:.8}
+.bar-row .nm{width:60px;font-size:12.5px;font-weight:600;color:var(--ink-2);flex-shrink:0}
+.bar-track{flex:1;height:9px;background:var(--line-2);border-radius:99px;overflow:hidden}
+.bar-fill{height:100%;border-radius:99px;transition:width .6s cubic-bezier(.2,.8,.2,1)}
+.bar-row .ct{width:26px;text-align:right;font-size:13px;font-weight:700;flex-shrink:0}
+
+/* distribution chips */
+.dist{display:flex;flex-wrap:wrap;gap:8px}
+.dist-chip{display:flex;align-items:center;gap:7px;background:var(--surface-2);border:1px solid var(--line);border-radius:99px;padding:7px 12px 7px 10px;font-size:12.5px;font-weight:600}
+.dist-chip.clk{cursor:pointer;transition:transform .1s,border-color .12s,background .12s}
+.dist-chip.clk:active{transform:scale(.95)}
+.dist-chip.clk:hover{border-color:var(--medit);background:var(--medit-050)}
+.dist-chip .dot{width:9px;height:9px;border-radius:50%}
+.dist-chip .n{color:var(--ink-3);font-weight:700}
+
+/* ============ LIST ============ */
+.searchbar{position:sticky;top:0;z-index:30;background:var(--bg);padding:12px 16px 8px}
+.search-inp{width:100%;background:var(--surface);border:1px solid var(--line);border-radius:13px;padding:12px 14px 12px 40px;font-size:15px;box-shadow:var(--shadow);
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='18' fill='none' stroke='%238a9997' stroke-width='2' stroke-linecap='round'%3E%3Ccircle cx='8' cy='8' r='6'/%3E%3Cpath d='m13 13 3 3'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:14px center}
+.search-inp:focus{outline:none;border-color:var(--teal);box-shadow:0 0 0 3px var(--teal-050)}
+.filters{display:flex;gap:7px;overflow-x:auto;padding:9px 16px 4px;scrollbar-width:none;align-items:center}
+.filters::-webkit-scrollbar{display:none}
+.frow-lab{flex-shrink:0;font-size:11px;font-weight:700;color:var(--ink-3);padding-right:3px}
+.fchip{flex-shrink:0;font-size:12.5px;font-weight:600;padding:7px 13px;border-radius:99px;background:var(--surface);border:1px solid var(--line);color:var(--ink-2);white-space:nowrap;transition:.15s}
+.fchip.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+.list-meta{padding:6px 20px 2px;font-size:12px;color:var(--ink-3);font-weight:600;display:flex;align-items:center;gap:6px}
+.sort-btn{margin-left:auto;font-size:11.5px;color:var(--ink-2);background:var(--surface-2);border:1px solid var(--line);border-radius:99px;padding:4px 10px;font-weight:700;flex-shrink:0}
+.clr-btn{font-size:11.5px;color:var(--medit-d);background:var(--medit-050);border:1px solid #cfe0ff;border-radius:99px;padding:4px 10px;font-weight:700;flex-shrink:0}
+
+.vlist{padding:8px 16px 8px}
+.vcard{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:14px 15px;margin-bottom:10px;box-shadow:var(--shadow);position:relative;transition:transform .1s,box-shadow .2s;overflow:hidden}
+.vcard:active{transform:scale(.985)}
+.vcard::before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--acc,var(--gray))}
+.vc-top{display:flex;align-items:center;gap:8px;margin-bottom:8px;flex-wrap:wrap}
+.badge{font-size:11px;font-weight:700;padding:4px 9px;border-radius:8px;letter-spacing:-.01em}
+.vc-date{margin-left:auto;font-size:12px;font-weight:700;color:var(--ink-3)}
+.vc-name{font-size:16px;font-weight:700;letter-spacing:-.02em;line-height:1.25}
+.vc-addr{font-size:12.5px;color:var(--ink-2);margin-top:3px;display:flex;gap:5px;align-items:flex-start;text-decoration:none}
+.vc-addr svg{flex-shrink:0;margin-top:2px;opacity:.55}
+.vc-addr:active{color:var(--medit)}
+.map-go{color:var(--medit);font-weight:700;font-size:11.5px;white-space:nowrap;flex-shrink:0;margin-left:2px}
+.vc-meta{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px;align-items:center}
+.tag{font-size:11.5px;font-weight:600;padding:4px 9px;border-radius:7px;background:var(--surface-2);border:1px solid var(--line);color:var(--ink-2)}
+.tag.prod{background:var(--teal-050);border-color:#cfe0ff;color:#00308f}
+.tag.person{background:#fff;border-color:var(--line);color:var(--ink);font-weight:700}
+.tag.person .av{display:inline-block;width:16px;height:16px;border-radius:50%;color:#fff;font-size:9px;font-weight:800;text-align:center;line-height:16px;margin-right:5px;vertical-align:-2px}
+.tag.deal{background:#e2f6ee;border-color:#b4e6cf;color:#007a54;font-weight:700}
+.vc-note{font-size:12.5px;color:var(--ink-2);margin-top:10px;padding-top:10px;border-top:1px solid var(--line-2);line-height:1.45;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.vc-dealer{font-size:12px;color:var(--ink-3);font-weight:500;margin-top:7px}
+
+.empty{text-align:center;padding:70px 30px;color:var(--ink-3)}
+.empty svg{opacity:.4;margin-bottom:14px}
+.empty p{font-size:14px;font-weight:600}
+.empty .s{font-size:12.5px;font-weight:500;margin-top:5px;opacity:.8}
+
+/* ============ DATA VIEW ============ */
+.data-card{padding:18px 16px;margin-bottom:12px}
+.data-stat{display:flex;align-items:center;gap:14px;margin-bottom:4px}
+.data-stat .big{font-size:34px;font-weight:800;letter-spacing:-.03em}
+.data-stat .lab{font-size:13px;color:var(--ink-2);font-weight:600;line-height:1.35}
+.act-btn{width:100%;display:flex;align-items:center;gap:13px;padding:15px 16px;background:var(--surface);border:1px solid var(--line);border-radius:var(--r-sm);margin-bottom:10px;box-shadow:var(--shadow);text-align:left;transition:.12s}
+.act-btn:active{background:var(--surface-2);transform:scale(.99)}
+.act-ic{width:40px;height:40px;border-radius:11px;display:grid;place-items:center;flex-shrink:0}
+.act-tx{flex:1}
+.act-tx .t{font-size:14.5px;font-weight:700}
+.act-tx .d{font-size:12px;color:var(--ink-3);font-weight:500;margin-top:2px}
+.act-btn .chev{opacity:.35}
+.note-box{font-size:12.5px;color:var(--ink-2);line-height:1.6;background:var(--surface-2);border:1px solid var(--line);border-radius:12px;padding:14px 15px;margin-top:6px}
+.note-box b{color:var(--ink);font-weight:700}
+
+/* ============ BOTTOM NAV ============ */
+.tabbar{position:fixed;bottom:0;left:0;right:0;z-index:50;max-width:520px;margin:0 auto;
+  background:rgba(255,255,255,.9);backdrop-filter:blur(16px);
+  border-top:1px solid var(--line);
+  display:flex;padding:8px 8px calc(8px + var(--safe-b));
+}
+.tab{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px 0;color:var(--ink-3);font-size:10.5px;font-weight:600;border-radius:12px;transition:.15s}
+.tab.on{color:var(--teal)}
+.tab svg{width:23px;height:23px}
+.tab.on svg{transform:translateY(-1px)}
+.fab{position:fixed;bottom:calc(64px + var(--safe-b));right:calc(50% - 260px + 18px);z-index:55;
+  width:56px;height:56px;border-radius:19px;background:linear-gradient(150deg,#1a63f5,#004fec);color:#fff;
+  display:grid;place-items:center;box-shadow:0 10px 26px -8px rgba(0,79,236,.5);transition:transform .12s}
+.fab:active{transform:scale(.92)}
+@media(max-width:556px){.fab{right:18px}}
+
+/* ============ SHEET (add/edit) ============ */
+.scrim{position:fixed;inset:0;z-index:90;background:rgba(16,32,31,.42);opacity:0;pointer-events:none;transition:opacity .25s}
+.scrim.show{opacity:1;pointer-events:auto}
+.sheet{position:fixed;left:0;right:0;bottom:0;z-index:100;max-width:520px;margin:0 auto;
+  background:var(--surface);border-radius:24px 24px 0 0;
+  transform:translateY(100%);transition:transform .32s cubic-bezier(.32,.72,0,1);
+  max-height:94vh;display:flex;flex-direction:column;box-shadow:var(--shadow-lg)}
+.sheet.show{transform:translateY(0)}
+.sheet-grip{width:38px;height:4px;background:var(--line);border-radius:99px;margin:10px auto 2px}
+.sheet-head{display:flex;align-items:center;justify-content:space-between;padding:8px 18px 14px;border-bottom:1px solid var(--line-2)}
+.sheet-head h2{font-size:17px;font-weight:800;letter-spacing:-.02em}
+.sheet-x{width:32px;height:32px;border-radius:9px;background:var(--surface-2);display:grid;place-items:center;color:var(--ink-2)}
+.sheet-body{overflow-y:auto;padding:16px 18px 8px;-webkit-overflow-scrolling:touch}
+.field{margin-bottom:16px}
+.field label{display:block;font-size:12.5px;font-weight:700;color:var(--ink-2);margin-bottom:7px}
+.field label .req{color:var(--red);margin-left:2px}
+.inp{width:100%;background:var(--surface-2);border:1.5px solid var(--line);border-radius:12px;padding:13px 14px;transition:.15s}
+.inp:focus{outline:none;border-color:var(--teal);background:#fff;box-shadow:0 0 0 3px var(--teal-050)}
+textarea.inp{resize:vertical;min-height:80px;line-height:1.5}
+.seg{display:flex;flex-wrap:wrap;gap:7px}
+.seg-opt{flex:1;min-width:calc(33% - 5px);text-align:center;padding:11px 6px;background:var(--surface-2);border:1.5px solid var(--line);border-radius:11px;font-size:13px;font-weight:600;color:var(--ink-2);transition:.13s}
+.seg-opt.on{color:#fff;border-color:transparent}
+.seg-2 .seg-opt{min-width:calc(50% - 4px)}
+.chips-pick{display:flex;flex-wrap:wrap;gap:7px}
+.pk{padding:9px 14px;background:var(--surface-2);border:1.5px solid var(--line);border-radius:99px;font-size:13px;font-weight:600;color:var(--ink-2);transition:.13s}
+.pk.on{background:var(--teal);color:#fff;border-color:var(--teal)}
+.sheet-foot{padding:14px 18px calc(18px + var(--safe-b));border-top:1px solid var(--line-2);display:flex;gap:10px;background:var(--surface)}
+.btn{flex:1;padding:15px;border-radius:13px;font-size:15px;font-weight:700;transition:.13s}
+.btn:active{transform:scale(.98)}
+.btn-primary{background:linear-gradient(150deg,#0a5bff,#00308f);color:#fff;box-shadow:0 8px 20px -8px rgba(0,79,236,.5)}
+.btn-ghost{background:var(--surface-2);color:var(--ink-2);flex:0 0 auto;padding:15px 20px}
+.btn-danger{background:#fef1ec;color:var(--red);flex:0 0 auto;padding:15px 18px}
+
+.toast{position:fixed;bottom:calc(90px + var(--safe-b));left:50%;transform:translateX(-50%) translateY(20px);z-index:200;
+  background:var(--ink);color:#fff;padding:12px 20px;border-radius:99px;font-size:13.5px;font-weight:600;
+  opacity:0;pointer-events:none;transition:.3s;box-shadow:var(--shadow-lg);white-space:nowrap}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+.detail-row{display:flex;padding:11px 0;border-bottom:1px solid var(--line-2);font-size:13.5px;gap:12px}
+.detail-row:last-child{border:none}
+.detail-row .k{width:74px;flex-shrink:0;color:var(--ink-3);font-weight:600;font-size:12.5px}
+.detail-row .v{flex:1;font-weight:500;word-break:break-word}
+</style>
+</head>
+<body>
+<div id="app">
+
+  <!-- APP BAR -->
+  <header class="appbar">
+    <div class="appbar-top">
+      <div class="brand">
+        <div class="brand-logo" aria-label="MEDIT">
+          <svg viewBox="0 0 1000 783" xmlns="http://www.w3.org/2000/svg" fill="#004FEC">
+            <path d="M780.77 670.84C673.47 670.84 673.47 608.81 673.47 608.81H666.68V684.81C666.68 704.64 674.62 782.65 774.78 782.65H999.99V670.84H780.76H780.77Z"/>
+            <path d="M730.26 335.46H999.97V223.65H774.75C700.08 223.65 677.27 266.05 669.52 297.24C669.52 297.24 665.97 310.16 663.99 317.55C662 324.94 658.86 343.04 631 343.04H368.99C341.13 343.04 337.99 324.94 336 317.55C334.01 310.16 330.47 297.24 330.47 297.24C322.72 266.06 299.91 223.65 225.24 223.65H0.0300293V335.46H269.74C303.58 335.46 323.96 340.88 333.22 375.01C334.79 380.78 343.05 410.72 344.52 416.07C354.74 453.24 407.32 454.85 434.88 454.85H565.11C592.67 454.85 645.25 453.24 655.47 416.07C656.94 410.72 665.2 380.78 666.77 375.01C676.04 340.88 696.41 335.46 730.25 335.46H730.26Z"/>
+            <path d="M999.98 447.23H666.7V559.07H999.98V447.23Z"/>
+            <path d="M219.23 670.84H0V782.65H225.21C325.37 782.65 333.31 704.63 333.31 684.81V608.81H326.52C326.52 608.81 326.52 670.84 219.22 670.84H219.23Z"/>
+            <path d="M333.22 151.35C334.79 157.12 343.05 187.06 344.52 192.4C354.74 229.57 407.32 231.18 434.88 231.18H565.11C592.67 231.18 645.25 229.57 655.47 192.4C656.94 187.05 665.2 157.12 666.77 151.35C676.04 117.22 696.41 111.8 730.25 111.8H999.96V0H774.74C700.07 0 677.26 42.4 669.51 73.58C669.51 73.58 665.96 86.5 663.98 93.89C661.99 101.28 658.85 119.38 630.99 119.38H368.98C341.12 119.38 337.98 101.28 335.99 93.89C334 86.5 330.46 73.58 330.46 73.58C322.73 42.4 299.92 0 225.25 0H0.0300293V111.81H269.74C303.58 111.81 323.96 117.23 333.22 151.36V151.35Z"/>
+            <path d="M333.3 447.23H0.0200195V559.07H333.3V447.23Z"/>
+          </svg>
+        </div>
+        <div>
+          <h1>고객 방문 관리</h1>
+          <p>Korea Team · End-user 방문 리스트</p>
+        </div>
+      </div>
+      <div class="appbar-badge" id="hdrCount">— 건</div>
+    </div>
+  </header>
+
+  <!-- ======= DASHBOARD ======= -->
+  <section class="view active" id="view-dash">
+    <div class="pad">
+      <div class="hero-sub">
+        <span class="m" id="dashMonth">2026년 7월</span>
+        <span class="s" id="dashRange">최근 방문 현황</span>
+      </div>
+      <div class="kpi-grid" id="kpiGrid"></div>
+
+      <div class="section-t">담당자별 방문</div>
+      <div class="card panel">
+        <div id="byPerson"></div>
+      </div>
+
+      <div class="section-t">구분별 분포</div>
+      <div class="card panel">
+        <div class="dist" id="byType"></div>
+      </div>
+
+      <div class="section-t">제품별 방문</div>
+      <div class="card panel">
+        <div class="dist" id="byProduct"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ======= LIST ======= -->
+  <section class="view" id="view-list">
+    <div class="searchbar">
+      <input class="search-inp" id="search" placeholder="치과명 · 주소 · 딜러사 · 내용 검색" autocomplete="off">
+    </div>
+    <div class="filters" id="filterType"></div>
+    <div class="filters" id="filterPerson"></div>
+    <div class="filters" id="filterStatus"></div>
+    <div class="list-meta" id="listMeta"></div>
+    <div class="vlist" id="vlist"></div>
+  </section>
+
+  <!-- ======= DATA ======= -->
+  <section class="view" id="view-data">
+    <div class="pad">
+      <div class="card data-card">
+        <div class="data-stat">
+          <span class="big tnum" id="dataCount">0</span>
+          <span class="lab">건의 방문 기록이<br>이 기기에 저장되어 있습니다</span>
+        </div>
+        <div style="font-size:12px;color:var(--ink-3);margin-top:8px;font-weight:500" id="dataSaved"></div>
+      </div>
+
+      <div class="section-t">내보내기</div>
+      <button class="act-btn" onclick="exportXLSX()">
+        <span class="act-ic" style="background:#e2efda;color:#2e7d32">
+          <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 3h9l4 4v10a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1Z"/><path d="m8 10 4 5M12 10l-4 5"/></svg>
+        </span>
+        <span class="act-tx"><span class="t">엑셀로 내보내기 (원본 서식)</span><span class="d">기존 관리표와 같은 모양의 .xlsx로 저장</span></span>
+        <span class="chev">›</span>
+      </button>
+      <button class="act-btn" onclick="exportCSV()">
+        <span class="act-ic" style="background:var(--teal-050);color:var(--teal)">
+          <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 3h9l4 4v10a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1Z"/><path d="M7 11h6M7 14h6M7 8h3"/></svg>
+        </span>
+        <span class="act-tx"><span class="t">엑셀(CSV)로 내보내기</span><span class="d">기존 엑셀에 붙여넣거나 열 수 있어요</span></span>
+        <span class="chev">›</span>
+      </button>
+      <button class="act-btn" onclick="exportJSON()">
+        <span class="act-ic" style="background:var(--violet-050);color:var(--violet)">
+          <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h12v12H4z"/><path d="M8 8h4M8 12h4"/></svg>
+        </span>
+        <span class="act-tx"><span class="t">백업 파일(JSON) 저장</span><span class="d">전체 데이터를 파일로 백업합니다</span></span>
+        <span class="chev">›</span>
+      </button>
+
+      <div class="section-t">가져오기 / 초기화</div>
+      <button class="act-btn" onclick="document.getElementById('importFile').click()">
+        <span class="act-ic" style="background:var(--blue-050);color:var(--blue)">
+          <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 3v10M6 9l4 4 4-4"/><path d="M4 15v2h12v-2"/></svg>
+        </span>
+        <span class="act-tx"><span class="t">백업 파일 불러오기</span><span class="d">JSON 백업으로 복원합니다</span></span>
+        <span class="chev">›</span>
+      </button>
+      <input type="file" id="importFile" accept=".json" style="display:none" onchange="importJSON(event)">
+      <button class="act-btn" onclick="resetSeed()">
+        <span class="act-ic" style="background:var(--gray-050);color:var(--gray)">
+          <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 8A6 6 0 1 0 15 13"/><path d="M16 4v4h-4"/></svg>
+        </span>
+        <span class="act-tx"><span class="t">샘플 데이터로 초기화</span><span class="d">시연용 초기 데이터로 되돌립니다</span></span>
+        <span class="chev">›</span>
+      </button>
+
+      <div class="note-box" style="margin-top:18px">
+        <b>이건 시제품(프로토타입)이에요.</b><br>
+        지금은 데이터가 이 브라우저에만 저장돼요. 여러 명이 동시에 공유·수정하려면 개발팀에서 서버(DB)와 로그인을 붙이면 됩니다. 이 화면이 곧 개발 요청 스펙이 됩니다.
+      </div>
+    </div>
+  </section>
+
+  <!-- BOTTOM NAV -->
+  <nav class="tabbar">
+    <button class="tab on" data-view="dash">
+      <svg fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 13h6V4H4zM14 20h6V4h-6zM4 20h6v-4H4z"/></svg>
+      대시보드
+    </button>
+    <button class="tab" data-view="list">
+      <svg fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M8 6h12M8 12h12M8 18h12"/><circle cx="4" cy="6" r="1"/><circle cx="4" cy="12" r="1"/><circle cx="4" cy="18" r="1"/></svg>
+      방문 목록
+    </button>
+    <button class="tab" data-view="data">
+      <svg fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="6" rx="8" ry="3"/><path d="M4 6v12c0 1.7 3.6 3 8 3s8-1.3 8-3V6"/><path d="M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3"/></svg>
+      데이터
+    </button>
+  </nav>
+  <button class="fab" id="fab" aria-label="방문 추가">
+    <svg width="26" height="26" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M13 5v16M5 13h16"/></svg>
+  </button>
+
+</div>
+
+<!-- SHEET -->
+<div class="scrim" id="scrim"></div>
+<div class="sheet" id="sheet">
+  <div class="sheet-grip"></div>
+  <div class="sheet-head">
+    <h2 id="sheetTitle">방문 추가</h2>
+    <button class="sheet-x" id="sheetClose">
+      <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M4 4l10 10M14 4L4 14"/></svg>
+    </button>
+  </div>
+  <div class="sheet-body" id="sheetBody"></div>
+  <div class="sheet-foot" id="sheetFoot"></div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ============ CONFIG ============ */
+const TYPES = [
+  {k:"1차 설치교육", c:"#004fec", bg:"#e6efff"},
+  {k:"2차 설치교육", c:"#0e7aa8", bg:"#e2f2f8"},
+  {k:"데모교육",     c:"#6d54b5", bg:"#efeafa"},
+  {k:"유지교육",     c:"#b45309", bg:"#fbf1e3"},
+  {k:"대학교",       c:"#0f766e", bg:"#e6f4f2"},
+  {k:"기타",         c:"#5b6b69", bg:"#eef1f1"},
+];
+const PEOPLE = ["이주호","박혜미","이정은","윤채원","장건우"];
+const PERSON_COLOR = {"이주호":"#004fec","박혜미":"#c2417d","이정은":"#0e7aa8","윤채원":"#b45309","장건우":"#6d54b5"};
+const PRODUCTS = ["i900 시리즈","i900","i900c","i900m","i700","i600"];
+const typeMeta = k => TYPES.find(t=>t.k===k) || TYPES.find(t=>t.k==="기타");
+
+/* ============ SEED (실제 시트 데이터) ============ */
+const SEED = [{"type":"설치교육","date":"2025-11-01","person":"이주호","clinic":"메디트 치과","addr":"서울시 양평구","dealer":"메디트","product":"i900c","contract":"","sn":"","note":"랩탑 딜러사 개별 구매"},{"type":"데모교육","date":"2025-11-04","person":"이주호","clinic":"서초 양치과의원","addr":"서울특별시 강남구 역삼로 124","dealer":"티에네스","product":"i600","contract":"계약완료","sn":"(21)BG2408100114","note":"2025 교정학회 데모 고객"},{"type":"1차 설치교육","date":"2025-11-05","person":"이주호","clinic":"서초 이을치과","addr":"서울특별시 서초구 서래로 49 4층","dealer":"티에네스","product":"i900c","contract":"","sn":"","note":"기존 i700 유저, 삼선비나 연자"},{"type":"1차 설치교육","date":"2025-11-10","person":"이주호","clinic":"부산 양덕치과","addr":"다대로429번길 15","dealer":"덴티스","product":"i700","contract":"계약완료","sn":"AZ2407100597","note":"덴티스 설치, 교육 지원"},{"type":"대학교","date":"2025-11-10","person":"박혜미","clinic":"부산대학교 치과병원","addr":"경남 양산시 물금읍 금오로 20","dealer":"티에네스","product":"i600","contract":"","sn":"","note":"i600, i900c 데모 요청, 20대 구매 가망 고객"},{"type":"기타","date":"2025-11-11","person":"박혜미","clinic":"계산청원치과의원","addr":"계산새로 1 2층 계산청원치과의원","dealer":"덴티스","product":"i900c","contract":"","sn":"","note":"All Care RMA 발생 건 장비 교체"},{"type":"데모교육","date":"2025-11-11","person":"이주호","clinic":"파주 우리아이소아치과","addr":"경의로 1090 삼융타워 4층 408호","dealer":"티에네스","product":"i900c","contract":"계약완료","sn":"CF2508100400","note":"2025 교정학회 데모 고객"},{"type":"유지교육","date":"2025-11-11","person":"이주호","clinic":"일산 호수치과의원","addr":"경기도 고양시 일산동구 노루목로 107 호수마을5단지","dealer":"허브","product":"i900c","contract":"","sn":"","note":"Pre-Service 방문"},{"type":"유지교육","date":"2025-11-11","person":"박혜미","clinic":"더화더본치과","addr":"인천광역시 미추홀구 숙골로 114 우리타워 302호","dealer":"모어덴","product":"i700","contract":"","sn":"","note":"Pre-Service 방문"},{"type":"1차 설치교육","date":"2025-11-13","person":"이주호","clinic":"동탄 연세선이고은치과","addr":"동탄반석로 124 쎈타프라자 2층","dealer":"","product":"i900c","contract":"","sn":"","note":"스킬업 세미나 연자, 원장님 미팅"},{"type":"데모교육","date":"2025-11-13","person":"이주호","clinic":"용인 연세 SK치과","addr":"경기도 용인시 정평로 34-2, 3층","dealer":"메가젠","product":"i900c","contract":"계약완료","sn":"CF2508100046","note":"i900c 데모 요청"},{"type":"1차 설치교육","date":"2025-11-14","person":"이주호","clinic":"서대문 따뜻한인치과","addr":"서울 서대문구 연희로 97 신라빌딩","dealer":"허브","product":"i900c","contract":"","sn":"","note":"1차 교육"},{"type":"데모교육","date":"2025-11-17","person":"이주호","clinic":"안양 동그라미치과","addr":"경수대로 446 (호계동) 신일빌딩 401호","dealer":"메가젠","product":"i900M","contract":"계약완료","sn":"CG2511100416","note":"환자케이스 데모 요청"},{"type":"데모교육","date":"2025-11-17","person":"이주호","clinic":"수원 우리사랑치과","addr":"중부대로 288 홍신빌딩 4층","dealer":"메가젠","product":"i900c","contract":"계약완료","sn":"CF2508100087","note":"1차 데모 후 판매 완료 고객"},{"type":"데모교육","date":"2025-11-18","person":"이주호","clinic":"아산 튼튼한어린이치과","addr":"충남 아산시 탕정면 한들물빛도시로 88 거산타워 401호~402호","dealer":"티에네스","product":"i600","contract":"","sn":"","note":""},{"type":"기타","date":"2025-11-18","person":"박혜미","clinic":"연세여우치과의원 대치점","addr":"서울 강남구 도곡로 408 2층","dealer":"","product":"i700","contract":"","sn":"","note":"메디트 세미나 강사 치과 스캐너 연결 이슈로 방문"},{"type":"유지교육","date":"2025-11-18","person":"박혜미","clinic":"시너지치과의원","addr":"서울특별시 동작구 동작대로 83 3층","dealer":"","product":"i700","contract":"","sn":"","note":"스캐너 사용 직원이 퇴사로 재교육 요청으로 재교육 진행"},{"type":"1차 설치교육","date":"2025-11-19","person":"이주호","clinic":"파주 우리아이소아치과","addr":"경의로 1090 삼융타워 4층 408호","dealer":"티에네스","product":"i900c","contract":"","sn":"","note":"1차 데모 후 판매 완료 고객"},{"type":"데모교육","date":"2025-11-19","person":"이주호","clinic":"동탄 연세에이스치과","addr":"동탄솔빛로 48 거택프라자 402호","dealer":"메가젠","product":"i900 시리즈","contract":"","sn":"","note":""},{"type":"데모교육","date":"2025-11-20","person":"이주호","clinic":"용인 아이가행복한치과","addr":"구갈로 74 구갈스포츠센타 2층 201호","dealer":"티에네스","product":"i600","contract":"계약완료","sn":"BG2408100131","note":"1차 데모 후 판매 완료 고객"},{"type":"1차 설치교육","date":"2025-11-20","person":"이주호","clinic":"서초 양치과의원","addr":"서울특별시 강남구 역삼로 124","dealer":"티에네스","product":"i600","contract":"","sn":"","note":"1차 데모 후 판매 완료 고객"},{"type":"2차 설치교육","date":"2025-11-20","person":"박혜미","clinic":"서울리더스치과","addr":"중동 1141-3 신역","dealer":"허브바이오텍","product":"i900c","contract":"","sn":"","note":"과도한 필터링 및 갑자기 데이터 사라짐에 대한 문의로 데이터 복구 기능 및 액티브 노이즈 필터링 기능 설명"},{"type":"대학교","date":"2025-11-21","person":"이주호","clinic":"부산 동서대학교 치위생과","addr":"부산광역시 사상구 주례로 47 (동서대학교)","dealer":"모어덴","product":"i700","contract":"","sn":"","note":"모어덴 설치, 교육 지원"},{"type":"유지교육","date":"2025-11-21","person":"박혜미","clinic":"케이악안면외과치과의원","addr":"경기 성남시 분당구 구미동 187-4","dealer":"","product":"i700","contract":"","sn":"","note":"Pre-Service"},{"type":"대학교","date":"2025-11-22","person":"이주호","clinic":"대구 수성대학교 치위생과","addr":"대구 수성대학교 치위생학과(대구광역시 수성구 달구벌대로 528길 15)","dealer":"","product":"i900c","contract":"","sn":"","note":"치위생학과 전공심화 학생 15명 대상(의료진) 메디트 스캐너 교육 진행"},{"type":"데모교육","date":"2025-11-24","person":"박혜미","clinic":"강남연세로운치과","addr":"서울 강남구 언주로 110 경남1차 상가 2층 1호, 6호","dealer":"허브바이오텍","product":"i900M,i900C","contract":"","sn":"","note":"데모"},{"type":"유지교육","date":"2025-11-24","person":"박혜미","clinic":"예미담치과의원","addr":"김포한강4로 507","dealer":"허브바이오텍","product":"i600","contract":"","sn":"","note":"Pre-Service 방문"},{"type":"데모교육","date":"2025-11-25","person":"박혜미","clinic":"수원 다올치과","addr":"율전로101번길 11 농민마트 3층","dealer":"메가젠","product":"i900M","contract":"","sn":"","note":"i700W 보상판매 데모"},{"type":"데모교육","date":"2025-11-25","person":"박혜미","clinic":"용인 연세수치과","addr":"금령로 105 3층","dealer":"메가젠","product":"i900M","contract":"계약완료","sn":"(21)CG2511100517","note":""},{"type":"데모교육","date":"2025-11-26","person":"이주호","clinic":"화성 아이끌림치과","addr":"경기 화성시 동탄대로 489 우성타워 7층","dealer":"티에네스","product":"i900 시리즈","contract":"","sn":"","note":""},{"type":"1차 설치교육","date":"2025-11-26","person":"이주호","clinic":"안양 아름치과기공소","addr":"경기 안양시 동안구 관악대로 488, 411호","dealer":"허브바이오텍","product":"T 510","contract":"","sn":"","note":"기공소 교육 지원 (*엑소 포함)"},{"type":"대학교","date":"2025-11-26","person":"박혜미","clinic":"조선대학교 치과병원","addr":"광주광역시 동구 서석동 421 조선대학교치과병원","dealer":"","product":"i900c","contract":"","sn":"","note":"Osstem 몽골 법인 세미나 지원"},{"type":"1차 설치교육","date":"2025-11-27","person":"이주호","clinic":"신촌 연세고운미소치과","addr":"서울특별시 마포구 신촌로 88 5층","dealer":"모어덴","product":"i900c","contract":"계약완료","sn":"CF2508100326","note":""},{"type":"1차 설치교육","date":"2025-11-27","person":"이주호","clinic":"광주 성원치과기공소","addr":"광주 서구 대남대로 462-1, 3층","dealer":"허브바이오텍","product":"T 710","contract":"","sn":"","note":""},{"type":"대학교","date":"2025-11-27","person":"박혜미","clinic":"전남대학교 치과병원","addr":"광주광역시 동구 제봉로 42 전남대학교병원","dealer":"","product":"i900c","contract":"","sn":"","note":"구강악안면외과 박홍주 교수님 미팅"},{"type":"데모교육","date":"2025-11-28","person":"박혜미","clinic":"씨디씨어린이치과의원","addr":"서울 강남구 학동로97길 11","dealer":"","product":"i900M","contract":"","sn":"","note":"데모"},{"type":"데모교육","date":"2025-11-28","person":"이주호","clinic":"수지 예인치과","addr":"경기도 용인시 수지구 문정로 13 401호(풍덕천동 중수프라자)","dealer":"메가젠 이승배 팀장","product":"i900c","contract":"계약완료","sn":"CF2509100210","note":"i500 보상 판매 영업중"},{"type":"데모교육","date":"2025-12-01","person":"이주호","clinic":"전북대학교 치과병원 보철과","addr":"전북 전주시 덕진구 건지로 20 전북대학교병원","dealer":"허브바이오텍 이제헌 대리","product":"i900M","contract":"계약완료","sn":"(21)CG2511100446","note":"보철학회 리드 건"},{"type":"데모교육","date":"2025-12-01","person":"이주호","clinic":"익산 북부치과","addr":"인북로 264-1 북부치과","dealer":"허브바이오텍 이제헌 대리","product":"i900c","contract":"","sn":"","note":""},{"type":"데모교육","date":"2025-12-02","person":"이주호","clinic":"파주 미래치과","addr":"청석로 260 트리플메디칼타워 4층 미래치과","dealer":"메가젠 곽태일 대리","product":"i900c","contract":"계약완료","sn":"CF2508100390","note":"1차 데모 후 판매 완료 고객"},{"type":"1차 설치교육","date":"2025-12-02","person":"이주호","clinic":"안양 동그라미치과","addr":"경기 안양시 경수대로 446 4층","dealer":"메가젠 황재연 팀장","product":"i900M","contract":"","sn":"","note":"설치 특이사항 없음"},{"type":"데모교육","date":"2025-12-03","person":"이주호","clinic":"안산 안녕하세요치과","addr":"광덕대로 206 2층 207, 208호","dealer":"허브바이오텍 김태훈 차장","product":"i900c","contract":"","sn":"","note":"약 일주일 데모 예정"},{"type":"데모교육","date":"2025-12-03","person":"이주호","clinic":"안양 서초와이즈치과","addr":"경기도 안양시 만안구 안양로303번길 8, 9층","dealer":"허브바이오텍 김태훈 차장","product":"i900c","contract":"","sn":"","note":"보철 제작 피드백 대기중"},{"type":"데모교육","date":"2025-12-03","person":"이주호","clinic":"양재 연세굿데이치과","addr":"서울특별시 서초구 강남대로 206 엔스빌딩 5-6층","dealer":"허브바이오텍 김태훈 차장","product":"i900M","contract":"","sn":"","note":"세미나 연자"},{"type":"1차 설치교육","date":"2025-12-04","person":"이주호","clinic":"용인 연세SK치과","addr":"용인 정평로 34-2 성운코아 2층","dealer":"메가젠 이승배 팀장","product":"i900c","contract":"","sn":"","note":"설치 및 교육 특이사항 없음"},{"type":"1차 설치교육","date":"2025-12-04","person":"이주호","clinic":"수원 우리사랑치과","addr":"중부대로 288 홍신빌딩 4층","dealer":"메가젠 이재석 대리","product":"i900c","contract":"","sn":"","note":"설치 및 교육 특이사항 없음"},{"type":"유지교육","date":"2025-12-05","person":"이주호","clinic":"김포 설아인치과의원","addr":"김포한강4로 521 한강메디플라자 3층, 4층","dealer":"","product":"i500, 600, 700","contract":"","sn":"","note":"Pre-Serive 방문 및 교육 제공"},{"type":"데모교육","date":"2025-12-08","person":"이주호","clinic":"수지 예인치과","addr":"경기도 용인시 수지구 문정로 13 401호(풍덕천동 중수프라자)","dealer":"메가젠 이승배 팀장","product":"i900c","contract":"","sn":"","note":"추가 환자 데모 요청"},{"type":"데모교육","date":"2025-12-09","person":"이주호","clinic":"서초 서울내곡치과","addr":"서울 서초구 헌릉로8길 9-8 내곡플라자 302, 303호","dealer":"티에네스 이승준 대리","product":"i900M,i900C","contract":"","sn":"","note":"데모"},{"type":"1차 설치교육","date":"2025-12-09","person":"이주호","clinic":"강남 역삼옥스치과","addr":"서울특별시 강남구 논현로 508 GS타워 지하1층","dealer":"","product":"i700","contract":"","sn":"","note":"설치 및 교육 특이사항 없음"},{"type":"데모교육","date":"2025-12-10","person":"이주호","clinic":"씨디씨어린이치과의원","addr":"서울 강남구 학동로97길 11","dealer":"","product":"i900M","contract":"","sn":"","note":"장비 관련 미팅 및 데모 교육"},{"type":"데모교육","date":"2025-12-12","person":"이주호","clinic":"강남 새로치과","addr":"강남대로 428 7층","dealer":"허브바이오텍 김태훈 차장","product":"i900c","contract":"계약완료","sn":"CF2603100461","note":"i900c 데모, 1주일 사용 설치 (교정과)"},{"type":"유지교육","date":"2025-12-12","person":"이주호","clinic":"동탄 연세선이고은치과","addr":"동탄반석로 124 쎈타프라자 2층","dealer":"","product":"i900c","contract":"","sn":"","note":"스킬업 세미나 연자, PC 이슈로 교체"},{"type":"1차 설치교육","date":"2025-12-15","person":"이주호","clinic":"춘천 장학우리치과","addr":"춘천 순환로 609 2층","dealer":"허브바이오텍 이제헌 대리","product":"i900c","contract":"계약완료","sn":"CF2507100669","note":"설치 및 교육 특이사항 없음, 스캐너 1대 추가 구매 고려 사이트"},{"type":"2차 설치교육","date":"2025-12-16","person":"이주호","clinic":"안양 동그라미치과","addr":"경수대로 446 (호계동) 신일빌딩 401호","dealer":"메가젠 황재연 팀장","product":"i900M","contract":"","sn":"","note":"2차 교육 특이사항 없음, 미러링 지원 완료"},{"type":"데모교육","date":"2025-12-17","person":"이주호","clinic":"포항 디자인치과","addr":"포스코대로 123","dealer":"티에네스 박노우 차장","product":"i900 시리즈","contract":"계약완료","sn":"CF2509100116","note":"1차 데모 후 판매 완료 고객"},{"type":"데모교육","date":"2025-12-17","person":"이주호","clinic":"포항 신세계치과","addr":"경상북도 포항시 북구 두호로 24 그랜드빌딩","dealer":"네오 (정철우 센터장)","product":"i900 시리즈","contract":"계약완료","sn":"7/9 설치 교육","note":""},{"type":"기타","date":"2025-12-18","person":"이주호","clinic":"김포 설아인치과의원","addr":"김포한강4로 521 한강메디플라자 3층, 4층","dealer":"","product":"i500, 600, 700","contract":"","sn":"","note":"인클리닉세미나, 클리닉캐드 관련 미팅"},{"type":"데모교육","date":"2025-12-19","person":"이주호","clinic":"수원 다올치과","addr":"율전로101번길 11 농민마트 3층","dealer":"메가젠 이화형 팀장","product":"i900M","contract":"","sn":"","note":""},{"type":"데모교육","date":"2025-12-19","person":"이주호","clinic":"서대문 서울이웃린치과","addr":"신촌로 13 아륭빌딩 7층","dealer":"모어덴 안지수 팀장","product":"i700","contract":"","sn":"","note":""},{"type":"1차 설치교육","date":"2025-12-19","person":"이주호","clinic":"용인 연세수치과","addr":"경기 용인시 금령로 105 3층","dealer":"메가젠 김주태 대리","product":"i900M","contract":"","sn":"","note":""},{"type":"데모교육","date":"2025-12-22","person":"이주호","clinic":"고양 기쁜하루치과","addr":"중앙로 1059 2층","dealer":"티에네스 이승준 매니저","product":"i600, i900c","contract":"","sn":"","note":""},{"type":"1차 설치교육","date":"2025-12-23","person":"이주호","clinic":"포항 디자인치과","addr":"포스코대로 123","dealer":"티에네스 박노우 차장","product":"i900c","contract":"","sn":"","note":""},{"type":"데모교육","date":"2025-12-24","person":"이주호","clinic":"강남 클리어치과","addr":"서울특별시 강남구 강남대로 406 글라스타워 8층","dealer":"메가젠 이재석 대리","product":"i900c","contract":"","sn":"","note":""},{"type":"데모교육","date":"2025-12-26","person":"이주호","clinic":"중랑 연세더베스트치과","addr":"동일로 942 2층","dealer":"덴티스 선우석 차장","product":"i900M","contract":"","sn":"","note":""},{"type":"데모교육","date":"2025-12-26","person":"이주호","clinic":"강북 서울정치과","addr":"서울 강북구 삼양로 27길 43 위브테라스파크 404호","dealer":"덴티스 선우석 차장","product":"i900 시리즈","contract":"계약완료","sn":"CF2601100017","note":""},{"type":"데모교육","date":"2025-12-29","person":"이주호","clinic":"강남 클리어치과","addr":"서울특별시 강남구 강남대로 406 글라스타워 8층","dealer":"메가젠 이재석 대리","product":"i900c","contract":"","sn":"","note":"환자 데모 요청으로 재방문"},{"type":"2차 설치교육","date":"2025-12-29","person":"이주호","clinic":"용인 연세수치과","addr":"금령로 105 3층","dealer":"메가젠 김주태 대리","product":"i900M","contract":"","sn":"","note":"올케어 2차 교육"},{"type":"1차 설치교육","date":"2025-12-30","person":"이주호","clinic":"안산대학교 치위생과","addr":"경기도 안산시 상록구 안산대학로 155","dealer":"모어덴 안지수 팀장","product":"i900c","contract":"계약완료","sn":"CF2509100171","note":"5대 설치 완료, 작동 특이사항 없음, 카트 5대 설치 완료"},{"type":"2차 설치교육","date":"2025-12-31","person":"이주호","clinic":"춘천 장학우리치과","addr":"춘천 순환로 609 2층","dealer":"허브바이오텍 이제헌 대리","product":"i900c","contract":"","sn":"","note":"올케어 2차 교육"},{"type":"1차 설치교육","date":"2026-01-02","person":"이주호","clinic":"용인 아이가행복한치과","addr":"경기도 용인시 기흥구 구갈로 74 구갈스포츠센타 2층 201호","dealer":"티에네스 (이승규 주임)","product":"i600","contract":"","sn":"","note":"설치 및 교육 특이사항 없음, 구강 스캐너 경험 부족으로 3회 교육 예정"},{"type":"기타","date":"2026-01-02","person":"박혜미","clinic":"계산 청원치과","addr":"계산새로 1 2층 계산청원치과의원","dealer":"덴티스 (김민섭 대리)","product":"i900c","contract":"","sn":"","note":"랩탑 이슈로 랩탑 변경 (추후 자사 랩탑 회수 예정) / 추가 3회 교육 진행 예정"},{"type":"기타","date":"2026-01-02","person":"박혜미","clinic":"인천 정원치과","addr":"인천광역시 계양구 계양대로 65 4층 정원치과","dealer":"","product":"i900","contract":"","sn":"","note":"Pre-Service 방문, 세미나 강사 연자"},{"type":"데모교육","date":"2026-01-06","person":"이주호","clinic":"강남 에피파니치과","addr":"도산대로 206 진성빌딩 2층","dealer":"네오바이오텍 지원","product":"i900M","contract":"계약완료","sn":"CG2509100248","note":"치과 내 네트워크로 i900M 구동 특이사항 없음 확인, 데모 완료"},{"type":"2차 설치교육","date":"2026-01-06","person":"이주호","clinic":"용인 아이가행복한치과","addr":"경기도 용인시 기흥구 구갈로 74 구갈스포츠센타 2층 201호","dealer":"티에네스 (이승규 주임)","product":"i600","contract":"","sn":"","note":"1회 추가 교육 진행 예정"},{"type":"데모교육","date":"2026-01-07","person":"이주호","clinic":"분당 미소선치과","addr":"서현로 180번길 13 3층","dealer":"메가젠 (주현수 대리)","product":"i900M","contract":"계약완료","sn":"CG2601100092","note":""},{"type":"데모교육","date":"2026-01-07","person":"이주호","clinic":"강동 연세우주아이정치과","addr":"아리수로93길 33 베스트플라자 301호","dealer":"티에네스 (이승준 대리)","product":"i900 시리즈","contract":"","sn":"","note":""},{"type":"데모교육","date":"2026-01-08","person":"박혜미","clinic":"구로 미사랑치과의원","addr":"경인로 53길 8 7층","dealer":"네오 (박경호 부장)","product":"i900M","contract":"","sn":"","note":"데모"},{"type":"1차 설치교육","date":"2026-01-09","person":"이주호","clinic":"전북대학교 치과병원 보철과","addr":"전북 전주시 덕진구 건지로 20 전북대학교병원","dealer":"허브바이오텍 (이제헌 대리)","product":"i900M","contract":"","sn":"","note":""},{"type":"데모교육","date":"2026-01-09","person":"이주호","clinic":"진안 문치과","addr":"진안군 진안읍 진무로 1092-1","dealer":"허브바이오텍 (이제헌 대리)","product":"i900 시리즈","contract":"","sn":"","note":""},{"type":"데모교육","date":"2026-01-09","person":"박혜미","clinic":"강릉 지앤박치과","addr":"강원 강릉시 선수촌로 130 2층","dealer":"메가젠 (이우근 차장)","product":"i900 시리즈","contract":"계약완료","sn":"CF2601100060","note":"데모"},{"type":"1차 설치교육","date":"2026-01-12","person":"박혜미","clinic":"파주 미래치과","addr":"청석로 260 트리플메디칼타워 4층 미래치과","dealer":"메가젠 (곽태일 대리)","product":"i900c","contract":"","sn":"","note":"설치교육 1차"},{"type":"대학교","date":"2026-01-13","person":"박혜미","clinic":"경희대 치과병원 보철과","addr":"서울특별시 동대문구 회기동 1-5","dealer":"","product":"i900M,i900c","contract":"","sn":"","note":"AOX세미나를 위한 장비 설치 및 교육 세미나 연자 : 노관태 교수님"},{"type":"1차 설치교육","date":"2026-01-14","person":"박혜미","clinic":"강북 서울정치과","addr":"서울 강북구 삼양로 27길 43 위브테라스파크 404호","dealer":"덴티스 (선우석 차장)","product":"i900c","contract":"","sn":"","note":""},{"type":"1차 설치교육","date":"2026-01-14","person":"박혜미","clinic":"(주)리얼티스 치과기공소","addr":"서울 성동구 성수일로 4길 25, 서울숲 코오롱디지털타워 604호","dealer":"허브바이오텍 (김정우 실장)","product":"i900c","contract":"","sn":"","note":""},{"type":"유지교육","date":"2026-01-19","person":"이주호","clinic":"강북 연세고운미소치과","addr":"도봉로 333 7층 연세고운미소치과","dealer":"허브바이오텍 (이제헌 과장)","product":"i900c","contract":"","sn":"","note":"스캔바디 스캔관련 추가교육, 유저 Q&A 교육"},{"type":"2차 설치교육","date":"2026-01-19","person":"이주호","clinic":"강남 에피파니치과","addr":"도산대로 206 진성빌딩 2층","dealer":"네오바이오텍 (윤일환 부장)","product":"i900M & iPad","contract":"","sn":"","note":"스캐너 연결관련 이슈 및 앱 오류 확인, 추가 교육"},{"type":"1차 설치교육","date":"2026-01-20","person":"이주호","clinic":"수지 예인치과","addr":"경기도 용인시 수지구 문정로 13 401호(풍덕천동 중수프라자)","dealer":"메가젠 (이승배 팀장)","product":"i900c","contract":"","sn":"","note":""},{"type":"대학교","date":"2026-01-20","person":"박혜미","clinic":"조선대 치과대학 병원","addr":"광주광역시 동구 필문대로 303 조선대학교치과병원","dealer":"","product":"","contract":"","sn":"","note":"손미경 교수님 미팅 (조선대 치과대한 총 동문회)"},{"type":"유지교육","date":"2026-01-20","person":"박혜미","clinic":"이클린치과의원 광주","addr":"광주 남구 서문대로701번길 2 넥스타워 7층","dealer":"네오바이오텍","product":"i700","contract":"","sn":"","note":"네오 바이오텍 요청 Pre-Service 방문"},{"type":"기타","date":"2026-01-21","person":"이정은","clinic":"백장현 치과의원","addr":"인천광역시 연수구 첨단대로 40 에스파이브시티 B동 603호","dealer":"","product":"i900c","contract":"","sn":"","note":"Korea Medit KOL"},{"type":"기타","date":"2026-01-21","person":"박혜미","clinic":"서울리더스치과","addr":"중동 1141-3 신역","dealer":"허브바이오텍","product":"i900c","contract":"","sn":"","note":"데이터 소실 이슈로 cx 차원으로 방문"},{"type":"데모교육","date":"2026-01-22","person":"박혜미","clinic":"계양플란트 치과","addr":"인천 계양구 계산새로 89 대림프라자 302-304호","dealer":"덴티스 지원","product":"i900c","contract":"","sn":"","note":""},{"type":"2차 설치교육","date":"2026-01-22","person":"이주호","clinic":"용인 아이가행복한치과","addr":"경기도 용인시 기흥구 구갈로 74 구갈스포츠센타 2층 201호","dealer":"티에네스 이승규 주임","product":"i600","contract":"","sn":"","note":"1회 추가 교육 요청으로 방문예정, 거래처 기공소 데이터 전송 등 교육 예정"},{"type":"기타","date":"2026-01-22","person":"이주호","clinic":"동탄 연세선이고은치과","addr":"동탄반석로 124 쎈타프라자 2층","dealer":"","product":"i900c","contract":"","sn":"","note":"스킬업 세미나 연자 미팅, 추가 교육"},{"type":"데모교육","date":"2026-01-23","person":"박혜미","clinic":"구로 미사랑치과의원","addr":"경인로 53길 8 7층","dealer":"네오 (박경호 부장)","product":"i900c","contract":"","sn":"","note":"i900M 데모했으나 너무 무거워 i900C 데모 요청주심"},{"type":"데모교육","date":"2026-01-23","person":"박혜미","clinic":"강남 연세굿데이치과","addr":"서울특별시 서초구 강남대로 206 엔스빌딩 5-6층","dealer":"허브바이오텍 (김태훈 차장)","product":"i900M","contract":"","sn":"","note":""},{"type":"데모교육","date":"2026-01-23","person":"이주호","clinic":"강북 경희치과병원","addr":"서울 강북구 도봉로 358(번동, 코스타타워)","dealer":"네오바이오텍 (조수범 프로)","product":"i900M","contract":"","sn":"","note":"트리오스5 렌탈 만료로 i900M 데모 요청"},{"type":"데모교육","date":"2026-01-26","person":"이주호","clinic":"강동 센트럴뉴욕치과","addr":"올림픽로 651 예경빌딩 3층","dealer":"메가젠 (곽승민 주임)","product":"i900M","contract":"","sn":"","note":""},{"type":"2차 설치교육","date":"2026-01-26","person":"박혜미","clinic":"포항 디자인치과","addr":"포스코대로 123","dealer":"티에네스 (박노우 차장)","product":"i900c","contract":"","sn":"","note":"바이트 이슈로 cx 팀에 연락"},{"type":"2차 설치교육","date":"2026-01-27","person":"이주호","clinic":"용인 연세SK치과","addr":"경기도 용인시 정평로 34-2, 3층","dealer":"메가젠 이승배 팀장","product":"i900c","contract":"","sn":"","note":"올케어 2차 교육 방문"},{"type":"유지교육","date":"2026-01-27","person":"이주호","clinic":"화성 하하교정치과","addr":"경기도 화성시 효행로 1056 탑 프라자 406호","dealer":"티에네스","product":"i600","contract":"","sn":"","note":""},{"type":"데모교육","date":"2026-01-27","person":"박혜미","clinic":"시지예미송치과의원","addr":"대구 수성구 달구벌대로 3231 보광빌딩 5층","dealer":"티에네스 (박노우 차장)","product":"i900c, i600","contract":"","sn":"","note":""},{"type":"1차 설치교육","date":"2026-01-28","person":"이주호","clinic":"분당 미소선치과","addr":"서현로 180번길 13 3층","dealer":"메가젠 (주현수 대리)","product":"i900M & iPad","contract":"","sn":"","note":""},{"type":"데모교육","date":"2026-01-28","person":"이주호","clinic":"용인 사랑이가득한치과","addr":"경기도 용인시 수지구 풍덕천로 127 수지프라자","dealer":"메가젠 (이승배 팀장)","product":"i900c","contract":"","sn":"","note":""},{"type":"기타","date":"2026-01-28","person":"박혜미","clinic":"경희대 치과병원 보철과","addr":"서울특별시 동대문구 회기동 1-5","dealer":"허브바이오텍 (이상원 차장)","product":"i900M,i900C","contract":"","sn":"","note":"AOX세미나를 미팅 세미나 연자 : 노관태 교수님"},{"type":"데모교육","date":"2026-01-28","person":"박혜미","clinic":"하루플란트","addr":"강남대로 411 6~10층","dealer":"허브바이오텍 (김태훈 차장)","product":"i900c","contract":"","sn":"","note":"임상데모는 추후 날짜 잡을 예정"},{"type":"기타","date":"2026-01-29","person":"박혜미","clinic":"강남 연세굿데이치과","addr":"서울특별시 서초구 강남대로 206 엔스빌딩 5-6층","dealer":"허브바이오텍 (김태훈 차장)","product":"i900M","contract":"","sn":"","note":"데모장비 회수 및 스킬업 세미나 미팅"},{"type":"1차 설치교육","date":"2026-01-30","person":"이주호","clinic":"안산대학교 치위생과","addr":"경기도 안산시 상록구 안산대학로 155","dealer":"모어덴 안지수 팀장","product":"i900c","contract":"","sn":"","note":"5대 설치 및 PC 1대1 연결"},{"type":"유지교육","date":"2026-01-30","person":"박혜미","clinic":"이백점 치과의원","addr":"서울특별시 양천구 남부순환로 352","dealer":"허브바이오텍 (김태훈 차장)","product":"i600","contract":"","sn":"","note":""},{"type":"기타","date":"2026-01-31","person":"박혜미","clinic":"연세여우치과","addr":"서울 강남구 도곡로 408 2층","dealer":"","product":"i700","contract":"","sn":"","note":"메디트 링크내 환자 데이터 소실로 방문"},{"type":"데모교육","date":"2026-02-02","person":"박혜미","clinic":"포항예스치과의원","addr":"경북 포항시 북구 중흥로 330 한도빌딩","dealer":"네오바이오텍 (정철우)","product":"i900 시리즈","contract":"","sn":"","note":"트리오스3,5 사용 중 프라임 스캔 과 i900 고려중"},{"type":"유지교육","date":"2026-02-02","person":"이주호","clinic":"조치원 이병진치과","addr":"세종특별자치시 조치원읍 조치원로 7 3층","dealer":"네오바이오텍 (김병성 부장)","product":"i500","contract":"","sn":"","note":"i500 불편 사항 교육, i900 안내"},{"type":"유지교육","date":"2026-02-03","person":"이주호","clinic":"부산 동래보스턴치과","addr":"부산광역시 동래구 충렬대로 222, 4층","dealer":"네오바이오텍 구매","product":"","contract":"","sn":"","note":""},{"type":"데모교육","date":"2026-02-03","person":"박혜미","clinic":"강남 새로치과","addr":"강남대로 428 7층","dealer":"허브바이오텍 (김태훈 차장)","product":"i900c","contract":"","sn":"","note":"i900c 데모, 1주일 사용 설치 (보철과)"},{"type":"유지교육","date":"2026-02-04","person":"이주호","clinic":"화곡 명인백민치과","addr":"월정로 134","dealer":"허브바이오텍 (이제헌 과장)","product":"i600","contract":"","sn":"","note":"스캔 데이터 노이즈 이슈로 컴플레인 사이트 pre-service 방문"},{"type":"데모교육","date":"2026-02-04","person":"박혜미","clinic":"하루플란트","addr":"강남대로 411 6~10층","dealer":"허브바이오텍 (김태훈 차장)","product":"i900c","contract":"","sn":"","note":"all on x 임상 케이스 데모"},{"type":"유지교육","date":"2026-02-05","person":"이주호","clinic":"수원 뷰티덴치과","addr":"일월로22번길 17 4층 뷰티덴치과","dealer":"허브바이오텍 (김태훈 차장)","product":"i700w","contract":"","sn":"","note":"제품 손상 확인, 추가 교육 요청으로 pre-service 방문, i900c 데모중"},{"type":"1차 설치교육","date":"2026-02-06","person":"이주호","clinic":"안산대학교 치위생과","addr":"경기도 안산시 상록구 안산대학로 155","dealer":"모어덴 (안지수 팀장)","product":"i900c","contract":"","sn":"","note":"5대 설치 및 PC 1대1 연결"},{"type":"기타","date":"2026-02-09","person":"이주호","clinic":"압구정 김준엽치과","addr":"서울 강남구 언주로 846 5층","dealer":"마케팅 KOL 팀","product":"","contract":"","sn":"","note":"마케팅 KOL 팀, KOL 미팅 동행"},{"type":"데모교육","date":"2026-02-10","person":"박혜미","clinic":"하루플란트","addr":"강남대로 411 6~10층","dealer":"허브바이오텍 (김태훈 차장)","product":"i900c","contract":"","sn":"","note":"all on x 임상 케이스 데모 (하악)"},{"type":"기타","date":"2026-02-10","person":"이주호","clinic":"인천 백장현치과","addr":"첨단대로 40 에스파이브시티 B동 603호","dealer":"마케팅 KOL 팀","product":"","contract":"","sn":"","note":"Clinic CAD 교육, 국내 KOL"},{"type":"2차 설치교육","date":"2026-02-11","person":"박혜미","clinic":"파주 미래치과","addr":"청석로 260 트리플메디칼타워 4층 미래치과","dealer":"메가젠 (곽태일 대리)","product":"i900c","contract":"","sn":"","note":"설치교육 2차"},{"type":"2차 설치교육","date":"2026-02-11","person":"이주호","clinic":"강남 양치과의원","addr":"서울특별시 강남구 역삼로 124","dealer":"티에네스 (이승준 주임)","product":"i600","contract":"","sn":"","note":"올케어 2차 교육 방문, 제품 만족도가 높아 i900c 데모 요청"},{"type":"2차 설치교육","date":"2026-02-11","person":"이주호","clinic":"분당 미소선치과","addr":"주서현로180번길 13 3층 미소선치과","dealer":"메가젠 (주현수 대리)","product":"i900M & iPad","contract":"","sn":"","note":"올케어 2차 교육 방문, apps 교육 진행"},{"type":"1차 설치교육","date":"2026-02-23","person":"이주호","clinic":"안산대학교 치위생과","addr":"경기도 안산시 상록구 안산대학로 155","dealer":"모어덴 (안지수 팀장)","product":"i900, i900c","contract":"","sn":"","note":"스캐닝, 클리닉캐드, 3D 프린트 출력 교수님 대상 교육 진행"},{"type":"데모교육","date":"2026-02-23","person":"박혜미","clinic":"개원준비중","addr":"개원준비중","dealer":"티에네스 (이승준 주임)","product":"i900M","contract":"","sn":"","note":"4월 중 개원 예정 (트리오스 5와 고민중)"},{"type":"데모교육","date":"2026-02-24","person":"박혜미","clinic":"행복플란트치과의원","addr":"서울 양천구 등촌로 28 3층","dealer":"네오바이오텍 (박경호 부장)","product":"i900M","contract":"","sn":"","note":"i700유저 보상판매 고민"},{"type":"1차 설치교육","date":"2026-02-24","person":"이주호","clinic":"아산 ZND치과기공소","addr":"충남 아산시 용머리길 40, 유니콘101 1동 513호","dealer":"허브바이오텍","product":"T710","contract":"","sn":"","note":"허브바이오텍 요청으로 방문 설치 교육"},{"type":"데모교육","date":"2026-02-25","person":"박혜미","clinic":"포도나무치과의원","addr":"제주 서귀포시 대정읍 신영로 75 4층","dealer":"네오바이오텍 (오용인 팀장)","product":"i900c","contract":"계약완료","sn":"CF2601100081","note":""},{"type":"유지교육","date":"2026-02-26","person":"박혜미","clinic":"서울리더스치과의원","addr":"제주특별자치도 서귀포시 표선면 표선동서로 246","dealer":"네오바이오텍 (오용인 팀장)","product":"i700","contract":"","sn":"","note":"스캔바디 스캔 첫 시도로 교육 요청"},{"type":"기타","date":"2026-02-27","person":"이주호","clinic":"용인 서울플란트치과","addr":"경기도 용인시 기흥구 용구대로 2384 신한빌딩 2층","dealer":"","product":"i900","contract":"","sn":"","note":"Clinic CAD 교육, 국내 스킬업 세미나 연자"},{"type":"유지교육","date":"2026-02-27","person":"이주호","clinic":"서대문 홍제365치과","addr":"서울시 서대문구 홍제동 330-54","dealer":"허브바이오텍 (이제헌 과장)","product":"i600","contract":"","sn":"","note":"스캐너 연결 이슈로 pre-service 방문, cx 원격 점검 특이사항 없음"},{"type":"유지교육","date":"2026-03-04","person":"이주호","clinic":"화곡 명인백민치과","addr":"월정로 134","dealer":"허브바이오텍 (이제헌 과장)","product":"i600","contract":"","sn":"","note":"스캔 데이터 노이즈 이슈로 컴플레인 사이트, 재출고 장비 교체 및 데모품 회수"},{"type":"1차 설치교육","date":"2026-03-05","person":"박혜미","clinic":"제주 포도나무치과의원","addr":"제주 서귀포시 대정읍 신영로 75 4층","dealer":"네오바이오텍 (오용인 팀장)","product":"i900c","contract":"","sn":"","note":"치과에 상주하여 2차교육까지 진행 할 예정"},{"type":"데모교육","date":"2026-03-05","person":"이주호","clinic":"창원 장유참치과의원","addr":"능동로167번길 1","dealer":"네오바이오텍 (김성민 계장)","product":"i900 시리즈","contract":"","sn":"","note":"네오 창원 지역 데모 요청"},{"type":"기타","date":"2026-03-10","person":"박혜미","clinic":"강남 아림치과의원","addr":"서울 강남구 테헤란로87길 13 서영빌딩 15층","dealer":"판테라","product":"","contract":"","sn":"","note":"판테라 x 메디트 스킬업 클래스 세미나 핸즈온 협의"},{"type":"기타","date":"2026-03-10","person":"박혜미","clinic":"강남 새로치과","addr":"강남대로 428 7층","dealer":"허브바이오텍 (김태훈 차장)","product":"i900c","contract":"","sn":"","note":"데모 완료 후 최종 세일즈 미팅"},{"type":"기타","date":"2026-03-10","person":"이주호","clinic":"압구정 김준엽치과","addr":"서울 강남구 언주로 846 5층","dealer":"마케팅 KOL 팀","product":"i900M & iPad","contract":"","sn":"","note":"KOL 계약 완료, 1차 설치 및 교육, 라우터 설치 필요"},{"type":"데모교육","date":"2026-03-11","person":"박혜미","clinic":"원주 건강한치과의원","addr":"강원 원주시 건강로 21 조은빌딩 2층","dealer":"네오바이오텍 (김민호 프로)","product":"i900 시리즈","contract":"","sn":"","note":"네오바이오텍 올케어 데모 요청"},{"type":"유지교육","date":"2026-03-11","person":"이주호","clinic":"서대문 따뜻한인치과","addr":"서울 서대문구 연희로 97 신라빌딩","dealer":"허브바이오텍 (이제헌 과장)","product":"i900c","contract":"","sn":"","note":"교합 이슈 컴플레인 치과방문, 설정 및 사용 방법 추가 교육"},{"type":"1차 설치교육","date":"2026-03-12","person":"박혜미","clinic":"방배 화이트플란트치과의원","addr":"서울 서초구 동작대로 190 3층","dealer":"네오바이오텍","product":"i900c","contract":"계약완료","sn":"CF2603100038","note":"네오바이오텍 올케어 교육 1차"},{"type":"데모교육","date":"2026-03-13","person":"박혜미","clinic":"대구 엠제이연합치과","addr":"달구벌대로 2280 아성N타워","dealer":"티에네스 (박노우 차장)","product":"i900 시리즈","contract":"계약완료","sn":"CF2603100310","note":"티에네스 올케어 데모 요청"},{"type":"데모교육","date":"2026-03-17","person":"이주호","clinic":"부평우리치과 인천부평본점","addr":"인천 부평구 부평대로 16 에이플러스에셋빌딩 5, 7층","dealer":"메가젠 (양필모 팀장)","product":"i900 시리즈","contract":"","sn":"","note":"올데이 데모 요청"},{"type":"기타","date":"2026-03-17","person":"윤채원","clinic":"강남 젊어지는치과의원","addr":"서울특별시 서초구 강남대로 405","dealer":"","product":"i900M","contract":"","sn":"","note":"i900M 연결 테스트 및 교육"},{"type":"기타","date":"2026-03-17","person":"이주호","clinic":"과천 이즈치과","addr":"별양상가3로 5 유니온빌딩 304호","dealer":"","product":"i900","contract":"","sn":"","note":"연결 이슈로 CS 방문"},{"type":"데모교육","date":"2026-03-18","person":"이주호","clinic":"서초 심다치과","addr":"강남대로 605 휴먼타워 3층","dealer":"네오바이오텍 (송명원 프로)","product":"i900 시리즈","contract":"","sn":"","note":"올데이 데모 요청"},{"type":"유지교육","date":"2026-03-18","person":"박혜미","clinic":"구미 아이꿈꾸는치과","addr":"경상북도 구미시 신시로 97 5층","dealer":"티에네스 (박노우 차장)","product":"i700","contract":"","sn":"","note":"i700 구매 후 교육이 제대로 이뤄지지 않아 사용 못하고 계심, 경북대 세미나에서 요청"},{"type":"2차 설치교육","date":"2026-03-19","person":"박혜미","clinic":"제주 포도나무치과의원","addr":"제주 서귀포시 대정읍 신영로 75 4층","dealer":"네오바이오텍 (오용인 팀장)","product":"i900c","contract":"","sn":"","note":"스캔 데이터 컴플레인 사이트, 방문 후 보철물 접합, 데이터 추출 진행예정, TE팀 충모님 동행"},{"type":"데모교육","date":"2026-03-19","person":"이주호","clinic":"용인 예치과","addr":"백옥대로 1136 E-메디칼빌딩","dealer":"허브스팟","product":"i900 시리즈","contract":"계약완료","sn":"CF2603100454","note":"허브스팟 접수 사이트"},{"type":"데모교육","date":"2026-03-20","person":"이주호","clinic":"용인 연세드림치과","addr":"구갈로60번길 11 삼성프라자","dealer":"메가젠 (이승배 팀장)","product":"i900 시리즈","contract":"","sn":"","note":""},{"type":"데모교육","date":"2026-03-20","person":"박혜미","clinic":"프라미스치과의원","addr":"서울 마포구 마포대로 143 마포공덕파크팰리스 Ⅱ","dealer":"허브스팟","product":"i900c","contract":"","sn":"","note":""},{"type":"1차 설치교육","date":"2026-03-23","person":"박혜미","clinic":"대구 엠제이연합치과","addr":"달구벌대로 2280 아성N타워","dealer":"티에네스 (박노우 차장)","product":"i900c","contract":"","sn":"","note":""},{"type":"유지교육","date":"2026-03-23","person":"이주호","clinic":"서산 행복한치과","addr":"호수공원2로 33","dealer":"네오바이오텍 기술지원팀","product":"i900c","contract":"","sn":"","note":"i900c 구매 이후 교육 및 품질 이슈로 컴플레인 사이트, 방문 후 스캐너 PC 점검 및"},{"type":"데모교육","date":"2026-03-24","person":"박혜미","clinic":"연세대학교 치과병원","addr":"서울특별시 서대문구 신촌동 134","dealer":"네오바이오텍 (왕지홍 팀장)","product":"i900M","contract":"계약완료","sn":"CG2603100007","note":"구강악안면외과 환자 데모 요청"},{"type":"데모교육","date":"2026-03-24","person":"이주호","clinic":"김포 설아인치과의원","addr":"경기 김포시 김포한강4로 521 한강메디플라자 3층, 4층","dealer":"네오바이오텍 (송명원 프로)","product":"i900c","contract":"계약완료","sn":"CF2603100182","note":"25.12 인클리닉 세미나 i900c 데모 시연 완료 건, 보상판매 구매 완료"},{"type":"기타","date":"2026-03-24","person":"이정은","clinic":"부평 우리치과의원","addr":"인천 부평구 부평대로 16 에이플러스에셋빌딩 5, 7층","dealer":"메가젠 (양필모 팀장)","product":"i900M","contract":"","sn":"","note":""},{"type":"데모교육","date":"2026-03-25","person":"이주호","clinic":"군포 서울은치과의원","addr":"경기 군포시 산본로323번길 15","dealer":"메가젠 (장제민 부장)","product":"i900 시리즈","contract":"","sn":"","note":""},{"type":"데모교육","date":"2026-03-25","person":"박혜미","clinic":"건화치과의원","addr":"서울 관악구 중앙1나길 3","dealer":"허브바이오텍 (이제헌 과장)","product":"i600, i900c","contract":"","sn":"","note":"임상 데모 요청"},{"type":"데모교육","date":"2026-03-26","person":"박혜미","clinic":"서초 심다치과","addr":"서울 서초구 강남대로 605 휴먼타워 3층","dealer":"네오 (송명원 프로)","product":"i900 시리즈","contract":"","sn":"","note":"올데이 데모 요청"},{"type":"기타","date":"2026-03-26","person":"박혜미","clinic":"YB아트센터치과기공소","addr":"서울 서초구 강남대로 605 휴먼타워 3층","dealer":"네오 (송명원 프로)","product":"i900 시리즈","contract":"","sn":"","note":"올데이 데모 요청"},{"type":"데모교육","date":"2026-03-27","person":"이주호","clinic":"서울미치과의원","addr":"경남 창원시 마산합포구 합포로 112","dealer":"메가젠 (손영일 주임)","product":"","contract":"","sn":"","note":""},{"type":"데모교육","date":"2026-03-27","person":"장건우","clinic":"군포 서울은치과의원","addr":"경기 군포시 산본로323번길 15","dealer":"메가젠 (장제민 부장)","product":"i900M","contract":"","sn":"","note":"i900M 연결 테스트 및 교육, 환자 데모 요청"},{"type":"데모교육","date":"2026-03-27","person":"박혜미","clinic":"서울플랜트치과의원","addr":"서울 은평구 은평로 121 응암CO메디칼 9층","dealer":"허브바이오텍 (김태훈 차장)","product":"i900C","contract":"","sn":"","note":"임상데모"},{"type":"데모교육","date":"2026-03-30","person":"박혜미","clinic":"창원 하늘치과","addr":"경남 창원시 의창구 사림로 47 사림프라자","dealer":"메가젠","product":"i900M","contract":"","sn":"","note":"i500 사용 덴티움 구매"},{"type":"데모교육","date":"2026-03-31","person":"박혜미","clinic":"거제 연세치과의원","addr":"경상남도 거제시 거제중앙로 1941 6층 연세치과의원","dealer":"덴티스 (이윤화 과장)","product":"i900 시리즈","contract":"계약완료","sn":"CF2604100266","note":"올데이 데모 요청"},{"type":"데모교육","date":"2026-03-31","person":"이정은","clinic":"더시카고치과","addr":"영동대로96길 34 대윤빌딩 지하1층","dealer":"네오 (문상현)","product":"i900c","contract":"계약완료","sn":"CF2604100617","note":"올데이 데모 요청"},{"type":"데모교육","date":"2026-03-31","person":"이주호","clinic":"오션시티치과병원","addr":"부산광역시 강서구 명지오션시티4로 70 6층","dealer":"덴티스 (박상율 부장)","product":"i900 시리즈","contract":"","sn":"","note":"올데이 데모 요청"},{"type":"기타","date":"2026-03-31","person":"윤채원","clinic":"연세대학교 치과병원","addr":"서울특별시 서대문구 신촌동 134","dealer":"네오바이오텍 (왕지홍 팀장)","product":"i900c, i900m","contract":"","sn":"","note":"설치 확인 테스트"},{"type":"유지교육","date":"2026-04-01","person":"박혜미","clinic":"특별한치과의원","addr":"경남 창원시 성산구 용지로133번길 5 키다리빌딩","dealer":"덴티스 (박상율 부장)","product":"i600","contract":"","sn":"","note":"pre-service"},{"type":"데모교육","date":"2026-04-01","person":"이정은","clinic":"미앤미이희정치과","addr":"상도로 104 3층, 4층","dealer":"네오 (이광수 대리)","product":"i900c","contract":"","sn":"","note":""},{"type":"유지교육","date":"2026-04-01","person":"이주호","clinic":"부산 초읍예치과","addr":"새싹로 215","dealer":"네오","product":"i500","contract":"","sn":"","note":"Pre-service, BDEX 팔로업"},{"type":"1차 설치교육","date":"2026-04-02","person":"박혜미","clinic":"강남 새로치과","addr":"강남대로 428 7층","dealer":"허브바이오텍 김태훈 차장","product":"i900c","contract":"","sn":"","note":""},{"type":"데모교육","date":"2026-04-02","person":"장건우","clinic":"서울 마일스톤즈치과","addr":"낙성대로 30","dealer":"티에네스","product":"i900,i900m","contract":"계약완료","sn":"CG2604100035","note":"프라임, 아이테로 ,i600 사용중"},{"type":"2차 설치교육","date":"2026-04-03","person":"장건우","clinic":"강북 서울정치과","addr":"서울 강북구 삼양로 27길 43 위브테라스파크 404호","dealer":"덴티스 (선우석 차장)","product":"i900c","contract":"","sn":"","note":"올케어 2차교육, 네트워크 or pc 문제로 같이 확인 예정"},{"type":"1차 설치교육","date":"2026-04-03","person":"이주호","clinic":"진해 행복한치과","addr":"냉천로 107 룸타워 3층","dealer":"메가젠 (서권대 대리)","product":"i900c","contract":"","sn":"","note":"올케어 1차 교육"},{"type":"유지교육","date":"2026-04-03","person":"박혜미","clinic":"서울예우치과","addr":"서울특별시 강남구 삼성로133길 8 3층","dealer":"덴티스","product":"i900","contract":"","sn":"","note":"2년전 구매후 사용 중 이지만 제대로된 교육을 받지 못해 카카오 채널을 통해 교육 요청"},{"type":"기타","date":"2026-04-03","person":"윤채원","clinic":"미앤미이희정치과","addr":"상도로 104 3층, 4층","dealer":"네오 (이광수 대리)","product":"i900c","contract":"","sn":"","note":"환자 데모 요청"},{"type":"1차 설치교육","date":"2026-04-06","person":"이주호","clinic":"동우치과기공소","addr":"수원시 장안구 하률로 12번길 86","dealer":"허브바이오텍 (이제헌 과장)","product":"T710","contract":"계약완료","sn":"AK2601900032","note":"T시리즈 설치 교육 요청"},{"type":"기타","date":"2026-04-06","person":"박혜미","clinic":"전남대치과대학병원 보철과","addr":"광주광역시 동구 제봉로 42 전남대학교병원","dealer":"","product":"","contract":"","sn":"","note":"i900M 무치악 케이스 적용 피드백위한 설치 교육 및 미팅"},{"type":"데모교육","date":"2026-04-06","person":"장건우","clinic":"서울 김세일치과의원","addr":"서울 중랑구 동일로129길 1, 호정빌딩 3층","dealer":"허브스팟","product":"i900c, i900m","contract":"","sn":"","note":"i900c, i900m 제품 소개 및 간단 시연"},{"type":"1차 설치교육","date":"2026-04-07","person":"윤채원","clinic":"용인 예치과","addr":"백옥대로 1136 E-메디칼빌딩","dealer":"허브바이오텍 (이제헌 과장)","product":"i900c","contract":"","sn":"","note":"1차 설치교육"},{"type":"유지교육","date":"2026-04-07","person":"이주호","clinic":"동작 연세부부치과","addr":"동작구 사당로 224","dealer":"메가젠","product":"i600,i900c","contract":"","sn":"","note":"인스타 컴플레인, 메가젠 허브판매교체 이슈, pre-service"},{"type":"2차 설치교육","date":"2026-04-07","person":"장건우","clinic":"방배 화이트플란트치과의원","addr":"서울 서초구 동작대로 190 3층","dealer":"네오바이오텍","product":"i900c","contract":"","sn":"","note":""},{"type":"데모교육","date":"2026-04-08","person":"이주호","clinic":"강서 올바른치과","addr":"강서구 강서로 253 201호","dealer":"허브스팟","product":"i700,i900c","contract":"","sn":"","note":"허브스팟"},{"type":"데모교육","date":"2026-04-08","person":"이주호","clinic":"수원 제일수치과","addr":"경기 수원시 장안구 장안로 271","dealer":"네오바이오텍","product":"i900c","contract":"계약완료","sn":"CF2503100149","note":"네오 기술팀 데모 요청"},{"type":"기타","date":"2026-04-08","person":"이정은","clinic":"미앤미이희정치과","addr":"상도로 104 3층, 4층","dealer":"네오 (이광수 대리)","product":"i900c","contract":"","sn":"","note":"환자 데모 요청"},{"type":"기타","date":"2026-04-08","person":"장건우","clinic":"서울 마일스톤즈치과","addr":"낙성대로 30","dealer":"티에네스","product":"i900,i900m","contract":"","sn":"","note":"i900c, i900m 제품 회수 후 클라우드 데이터 정리 확인 예정"},{"type":"데모교육","date":"2026-04-08","person":"박혜미","clinic":"포항 착한치과","addr":"경상북도 포항시 남구 상도남로34번길 15 5층 포항 착한치과","dealer":"네오바이오텍 (정철우)","product":"i900c, i900m","contract":"","sn":"","note":"i500 유저, 시로나 스캐너 보유중 / 추후 프린트기 구매 예정으로 clinic cad 사용 고려"},{"type":"2차 설치교육","date":"2026-04-09","person":"박혜미","clinic":"엠제이연합치과","addr":"대구광역시 수성구 달구벌대로 2280 아성N타워","dealer":"티에네스 (박노우 차장)","product":"i900c","contract":"","sn":"","note":""},{"type":"기타","date":"2026-04-09","person":"박혜미","clinic":"덕영치과","addr":"대구 중구 국채보상로 511","dealer":"","product":"","contract":"","sn":"","note":"데모진행중 (라인업 확인 필요) + 스캔 데이터 관련 및 무치악 스캔 관련으로 미팅 요청 주심"},{"type":"데모교육","date":"2026-04-09","person":"이주호","clinic":"용인 임플라인치과","addr":"금령로 21 메디타워 2층","dealer":"메가젠 (김주태 대리)","product":"i900m","contract":"","sn":"","note":"클리닉 올데이 데모 요청"},{"type":"유지교육","date":"2026-04-10","person":"이주호","clinic":"용인 SK치과","addr":"경기도 용인시 정평로 34-2, 3층","dealer":"메가젠 (이승배 팀장)","product":"i900c","contract":"","sn":"","note":"교합 및 스캐너 연결 이슈 발생으로 방문 예정, 기공소 데이터 처리방법 재교육 예정"},{"type":"데모교육","date":"2026-04-10","person":"박혜미","clinic":"에이플러스치과의원","addr":"경기 하남시 아리수로 570 101동 2층 2003~2005호","dealer":"허브바이오텍 (유재현 차장)","product":"i900c","contract":"","sn":"","note":""},{"type":"데모교육","date":"2026-04-13","person":"이주호","clinic":"화성 아이끌림치과","addr":"경기 화성시 동탄대로 489 우성타워 7층","dealer":"티에네스 (권준형 과장)","product":"i900m","contract":"계약완료","sn":"CG2604100007","note":"추가 데모 후 클로징 예정"},{"type":"데모교육","date":"2026-04-14","person":"이주호","clinic":"동작 연세부부치과","addr":"동작구 사당로 224","dealer":"메가젠","product":"i900c","contract":"","sn":"","note":"데모 교육, 1주일 대여 예정"},{"type":"유지교육","date":"2026-04-14","person":"장건우","clinic":"수원 좋은이웃치과","addr":"일월로22번길 15","dealer":"덴티스","product":"i900","contract":"","sn":"","note":"현재 사용 PC 스펙 이슈로 퍼포먼스 저하, 데모 PC로 확인 후 구매 유도 예정, 추가 교육"},{"type":"1차 설치교육","date":"2026-04-14","person":"박혜미","clinic":"거제 연세치과의원","addr":"경상남도 거제시 거제중앙로 1941 6층 연세치과의원","dealer":"덴티스 (이윤화 과장)","product":"i900c","contract":"","sn":"","note":""},{"type":"데모교육","date":"2026-04-15","person":"박혜미","clinic":"거제 미소치과의원","addr":"읍내로 2길 31","dealer":"메가젠 (서권대 대리)","product":"i900 시리즈","contract":"","sn":"","note":"900시리즈 올데이 데모 요청"},{"type":"기타","date":"2026-04-15","person":"이정은","clinic":"에이플러스치과의원","addr":"경기 하남시 아리수로 570 101동 2층 2003~2005호","dealer":"허브바이오텍 (유재현 차장)","product":"i900c","contract":"","sn":"","note":"임상 데모"},{"type":"데모교육","date":"2026-04-15","person":"이주호","clinic":"개원 예정(Dr.한주연, 장현진)","addr":"충청남도 당진","dealer":"네오바이오텍 (심기민 프로)","product":"i900m&iPad","contract":"","sn":"","note":""},{"type":"1차 설치교육","date":"2026-04-15","person":"윤채원","clinic":"수원 제일수치과","addr":"경기 수원시 장안구 장안로 271","dealer":"네오바이오텍 (김민규 프로)","product":"i900c","contract":"","sn":"","note":"올케어 교육"},{"type":"기타","date":"2026-04-16","person":"장건우","clinic":"압구정 김준엽치과의원","addr":"서울 강남구 언주로 846 5층","dealer":"","product":"i900m&iPad","contract":"","sn":"","note":"메디트 KOL, 데이터 전송 이슈 관련 및 스캔 퍼포먼스 관련으로 방문"},{"type":"데모교육","date":"2026-04-16","person":"박혜미","clinic":"대구 로이스덕영치과","addr":"대구광역시 중구 국채보상로 511 덕영치과","dealer":"","product":"i900c","contract":"","sn":"","note":"상주 임상 데모 진행"},{"type":"데모교육","date":"2026-04-21","person":"이정은","clinic":"강남 라이브치과","addr":"서울특별시 강남구 논현로105길 48 라이브빌딩 1, 2층","dealer":"네오바이오텍","product":"i900c, i900m, i600","contract":"","sn":"","note":""},{"type":"유지교육","date":"2026-04-21","person":"장건우","clinic":"강남 에피파니치과","addr":"도산대로 206 진성빌딩 2층","dealer":"네오바이오텍 지원","product":"i900M","contract":"","sn":"","note":"i900M&iPad 스캔 퍼포먼스 저하 관련으로 방문"},{"type":"기타","date":"2026-04-22","person":"이정은","clinic":"강남 라이브치과","addr":"서울특별시 강남구 논현로105길 48 라이브빌딩 1, 2층","dealer":"네오 바이오텍 윤일환, 장재성님","product":"i700,900c","contract":"","sn":"","note":"i700,i900c 대여 27일 회수 예정"},{"type":"기타","date":"2026-04-22","person":"장건우","clinic":"강서 올바른치과","addr":"강서구 강서로 253 201호","dealer":"허브스팟","product":"i900c,i900m","contract":"","sn":"","note":"올데이 데모 요청"},{"type":"1차 설치교육","date":"2026-04-23","person":"장건우","clinic":"연세대학교 치과병원","addr":"서울특별시 서대문구 신촌동 134","dealer":"네오바이오텍 (왕지홍 팀장)","product":"i900m","contract":"","sn":"","note":""},{"type":"데모교육","date":"2026-04-23","person":"이주호","clinic":"마산 월드치과","addr":"3·15대로 152 득양빌딩 4층","dealer":"모어덴 (안지수 팀장)","product":"i900c","contract":"계약완료","sn":"CF2604100280","note":"올데이 데모 요청"},{"type":"데모교육","date":"2026-04-23","person":"이정은","clinic":"성동구 우리치과의원","addr":"서울 성동구 뚝섬로 395 2층, 3층","dealer":"","product":"i900c,i900m","contract":"","sn":"","note":"로이덴트 세미나 데모 건"},{"type":"데모교육","date":"2026-04-24","person":"이주호","clinic":"거제치과의원","addr":"경상남도 거제시 옥포동 535-5 유라빌딩","dealer":"네오바이오텍","product":"i900c","contract":"","sn":"","note":""},{"type":"데모교육","date":"2026-04-28","person":"장건우","clinic":"부산 이웃집치과의원","addr":"부산 해운대구 좌동순환로 505 센트럴메디타워 4층","dealer":"허브스팟","product":"i900c, i900m","contract":"","sn":"","note":"i500 유저, i900 series upgrade 고민 중"},{"type":"유지교육","date":"2026-04-29","person":"장건우","clinic":"울산 BS치과교정과치과의원","addr":"울산 남구 삼산로 254 8층","dealer":"네오바이오텍","product":"i500","contract":"계약완료","sn":"CF2605100027","note":"i500 유저, pre-service, all care service 및 보상판매 홍보로 구매 유도"},{"type":"1차 설치교육","date":"2026-04-29","person":"윤채원","clinic":"서울대학교 보철과","addr":"서울특별시 종로구 대학로 101","dealer":"네오바이오텍 (왕지홍 팀장)","product":"i700w","contract":"","sn":"","note":"pre-service 환자 스캔시 끊김 이슈 및 장비 체크 관련 방문"},{"type":"유지교육","date":"2026-04-30","person":"장건우","clinic":"강남 에피파니치과의원","addr":"도산대로 206 진성빌딩 2층","dealer":"네오바이오텍 지원","product":"i900M","contract":"","sn":"","note":"i900M&iPad Router 연결 후 스캔 퍼포먼스 체크"},{"type":"데모교육","date":"2026-04-30","person":"윤채원","clinic":"평택 이지치과","addr":"경기도 평택시 만세로 1866 제이프라자 3층","dealer":"메가젠 경기남부팀 (조신욱 대리)","product":"i900c","contract":"","sn":"","note":"올데이 데모 요청/ SIDEX 이후 구매검토"},{"type":"데모교육","date":"2026-05-06","person":"이정은","clinic":"인천 국제플란트치과의원","addr":"북항로32번안길 41 건원프라자 206~208호","dealer":"허브바이오텍 유재현 차장","product":"i900c","contract":"","sn":"","note":""},{"type":"데모교육","date":"2026-05-07","person":"박혜미","clinic":"포항 포유치과","addr":"경상북도 포항시 북구 중흥로 325 2층","dealer":"티에네스 (박노우 차장)","product":"i900c","contract":"계약완료","sn":"CF2605100026","note":""},{"type":"2차 설치교육","date":"2026-05-07","person":"윤채원","clinic":"연세대학교 치과병원","addr":"서울특별시 서대문구 신촌동 134","dealer":"네오바이오텍 (왕지홍 팀장)","product":"i900m","contract":"","sn":"","note":"2차 설치교육"},{"type":"1차 설치교육","date":"2026-05-07","person":"장건우","clinic":"서울 마일스톤즈치과","addr":"낙성대로 30","dealer":"티에네스(이승규 대리)","product":"i900m","contract":"","sn":"","note":"1차 설치교육, iPad 및 Laptop 별도 구매 x 추후 구매 시 2차 교육으로 셋업 예정"},{"type":"2차 설치교육","date":"2026-05-07","person":"이주호","clinic":"용인 예치과","addr":"백옥대로 1136 E-메디칼빌딩","dealer":"허브스팟","product":"i900c","contract":"","sn":"","note":"임플란트 케이스, 메디트 링크 기능 등 교육 완료"},{"type":"기타","date":"2026-05-08","person":"박혜미","clinic":"포항 착한치과","addr":"경상북도 포항시 남구 상도남로34번길 15 5층 포항 착한치과","dealer":"네오바이오텍 (정철우)","product":"i900c","contract":"","sn":"","note":"i500 유저, 시로나 스캐너 보유중 / 2차데모 진행"},{"type":"1차 설치교육","date":"2026-05-08","person":"이주호","clinic":"화성 아이끌림치과","addr":"경기 화성시 동탄대로 489 우성타워 7층","dealer":"티에네스 (권준형 과장)","product":"i900m","contract":"","sn":"","note":"1차 설치교육"},{"type":"기타","date":"2026-05-08","person":"윤채원","clinic":"평택 이지치과","addr":"경기도 평택시 만세로 1866 제이프라자 3층","dealer":"메가젠 경기남부팀 (조신욱 대리)","product":"i900c","contract":"","sn":"","note":"장비 회수 및 환자 데모 지원"},{"type":"데모교육","date":"2026-05-11","person":"박혜미","clinic":"무아치과교정과치과의원","addr":"도봉로 487 하나제2빌딩 4층","dealer":"허브바이오텍(이상원 차장)","product":"i900c","contract":"","sn":"","note":""},{"type":"기타","date":"2026-05-12","person":"이주호","clinic":"경희대학교 치과병원","addr":"서울 동대문구 경희대로 23","dealer":"","product":"i900m&iPad","contract":"","sn":"","note":"노관태 교수님 미팅 및 i900m & ipad 시연"},{"type":"데모교육","date":"2026-05-13","person":"박혜미","clinic":"노원구 심재철치과의원","addr":"서울 노원구 상계로23다길 13-8 노원 아이파크","dealer":"허브바이오텍(송주원 대리)","product":"i700, i900c","contract":"","sn":"","note":""},{"type":"1차 설치교육","date":"2026-05-14","person":"이주호","clinic":"마산 월드치과","addr":"3·15대로 152 득양빌딩 4층","dealer":"모어덴 (안지수 팀장)","product":"i900c","contract":"","sn":"","note":""},{"type":"기타","date":"2026-05-14","person":"윤채원","clinic":"노원구 심재철치과의원","addr":"서울 노원구 상계로23다길 13-8 노원 아이파크","dealer":"허브바이오텍(송주원 대리)","product":"i900c","contract":"","sn":"","note":"장비대여 및 교육지원"},{"type":"데모교육","date":"2026-05-15","person":"박혜미","clinic":"배치과의원","addr":"경남 김해시 계동로102번길 31 서화빌딩 4층","dealer":"덴티스 (박상율 부장)","product":"i900c,i900m","contract":"","sn":"","note":"올데이 임상 데모"},{"type":"1차 설치교육","date":"2026-05-15","person":"장건우","clinic":"부산 방경환동행치과","addr":"명륜로103번길 3 101호","dealer":"덴티스 (안민석 과장)","product":"i700w","contract":"덴티스 판매","sn":"BF2204101114","note":""},{"type":"데모교육","date":"2026-05-15","person":"이주호","clinic":"김해 진영마미치과의원","addr":"경남 김해시 진영읍 진영리 1626-2","dealer":"모어덴 (안지수 팀장)","product":"i900c","contract":"계약완료","sn":"CF2606100281","note":"i600,i700,i900 투명교정,싱글크라운 용도"},{"type":"기타","date":"2026-05-21","person":"박혜미","clinic":"양재 연세굿데이치과","addr":"서울특별시 서초구 강남대로 206 엔스빌딩 5-6층","dealer":"","product":"","contract":"","sn":"","note":"5월 24일 스킬업 세미나 미팅"},{"type":"기타","date":"2026-05-21","person":"이정은","clinic":"부천대학교","addr":"경기도 부천시 원미구 신흥로 56번길 25","dealer":"","product":"","contract":"","sn":"","note":"Pre-Service 장비 점검 및 스캐너 실습 교육"},{"type":"데모교육","date":"2026-05-21","person":"윤채원","clinic":"365 올케어 치과","addr":"동호로 171 더그레이스빌딩 4층","dealer":"허브스팟","product":"i900c, i900m","contract":"계약완료","sn":"CG2604100042","note":"올데이 데모 요청"},{"type":"2차 설치교육","date":"2026-05-22","person":"이주호","clinic":"화성 아이끌림치과","addr":"경기 화성시 동탄대로 489 우성타워 7층","dealer":"티에네스 (권준형 과장)","product":"i900m&iPad","contract":"","sn":"","note":"랩탑 버전 추가 교육 예정"},{"type":"데모교육","date":"2026-05-22","person":"이정은","clinic":"해피키즈치과","addr":"인천 미추홀구 학익로80번길 11 시티오씨엘 3단지 2층 A218호","dealer":"티에네스 (이승규 주임)","product":"i700,i900c","contract":"","sn":"","note":"i900c 대여 27일 회수"},{"type":"데모교육","date":"2026-05-27","person":"박혜미","clinic":"금천 우리치과의원","addr":"서울 금천구 금하로 763 벽산중심상가","dealer":"네오바이오텍 조성우 차장","product":"i900c, i900m","contract":"계약완료","sn":"CF2604100618","note":""},{"type":"기타","date":"2026-05-28","person":"윤채원","clinic":"365 올케어 치과","addr":"서울 중구 동호로 171 더그레이스빌딩 4층","dealer":"티에네스 (권준형 과장)","product":"i900c","contract":"","sn":"","note":"PC 점검 및 장비 회수"},{"type":"기타","date":"2026-06-01","person":"박혜미","clinic":"신구대학교 치위생과","addr":"경기도 성남시 중원구 광명로 377","dealer":"","product":"i700","contract":"","sn":"","note":"치위생과 전공심화 학생 대상 스캐너 교육"},{"type":"기타","date":"2026-06-02","person":"박혜미","clinic":"서울대학교 구강내과","addr":"서울특별시 종로구 대학로 101","dealer":"제이원덴탈","product":"i900","contract":"","sn":"","note":"스캐너 교육 및 앱 교육 요청"},{"type":"데모교육","date":"2026-06-02","person":"박혜미","clinic":"충무 바른치과의원","addr":"충무로 13 엘크루 메트로시티 5층","dealer":"허브바이오텍(송주원 대리)","product":"i900m","contract":"계약완료","sn":"CF2605100262","note":""},{"type":"1차 설치교육","date":"2026-06-04","person":"박혜미","clinic":"포항 포유치과","addr":"경상북도 포항시 북구 중흥로 325 2층","dealer":"티에네스 (박노우 차장)","product":"i900c","contract":"","sn":"","note":"1차 설치교육"},{"type":"2차 설치교육","date":"2026-06-04","person":"장건우","clinic":"서울 마일스톤즈치과의원","addr":"낙성대로 30","dealer":"티에네스 (이승규 대리)","product":"i900m","contract":"","sn":"","note":"올케어 2차 교육"},{"type":"1차 설치교육","date":"2026-06-04","person":"장건우","clinic":"순천 하이덴치과의원","addr":"전남 순천시 신월큰길 1-4 6층","dealer":"네오바이오텍","product":"i900c","contract":"네오판매","sn":"CF2605100016","note":"올케어 1차 설치 및 교육"},{"type":"데모교육","date":"2026-06-04","person":"이주호","clinic":"창원 한이태치과","addr":"냉천로 91 3층 한이태치과","dealer":"메가젠 (서권재 대리)","product":"i900 시리즈","contract":"","sn":"","note":"1. 상주하여 2일 임상 데모 진행 2. Prime Connect 같이 데모 진행중 3. Prime Connect로 구매진행(스캐닝 퍼포먼스 이슈)"},{"type":"2차 설치교육","date":"2026-06-04","person":"이주호","clinic":"진해 미소가득치과","addr":"냉천로 83 석동메디컬빌딩 5층 진해미소가득치과의원","dealer":"메가젠 (서권재 대리)","product":"i900c","contract":"","sn":"","note":"1. 올케어 2차 교육"},{"type":"기타","date":"2026-06-05","person":"이주호","clinic":"창원 서울플란트치과","addr":"경남 창원시 진해구 충장로 361 5층 502호","dealer":"","product":"i900c","contract":"","sn":"","note":"1. 개발팀 서범식 팀장 요청으로 설치 교육 진행"},{"type":"데모교육","date":"2026-06-05","person":"윤채원","clinic":"성남 위례서울치과","addr":"경기도 성남시 수정구 위례광장로 310 우성트램타워 B동 8층","dealer":"네오바이오텍 (김유철)","product":"i900m&iPad","contract":"","sn":"","note":"1. 기존 트리오스 사용유저, 일주일 미러링을 통한 데모 진행 2. 체어내에서 빠르게 스캔과 상담이 동시에 이루어지는것을 강조 및 구매포인트 3. i900c와 프라임 커넥, 메가젠 R2i3와 함께 비교예정"},{"type":"유지교육","date":"2026-06-05","person":"윤채원","clinic":"성남 창조치과","addr":"경기 성남시 분당구 성남대로 385 분당클리닉 4층 401호","dealer":"티에네스(이승규 대리)","product":"i700","contract":"","sn":"","note":"1. i700 스캐너 끊김(꺼짐) 이슈, 티에네스 요청으로방문 2. 연결방법에 대한 소통오류로 응대 3. 장비 크로스체크 후 잘되는것을 확인 및 장비 점검을위해 원내 스캐너 회수"},{"type":"데모교육","date":"2026-06-08","person":"윤채원","clinic":"동탄 경승현치과","addr":"경기 화성시 동탄구 동탄대로시범길 134 카림상가 2층 2021호","dealer":"티에네스 (권준형 과장)","product":"i900c, i900m","contract":"","sn":"","note":"1. 기존 i700 유저, 일주일 대여 진행 2. 마진라인이 잘나오는 것을 중요하게 생각하심 보철물 적합도가 구매 전환의포인트로 일주일대여 진행중 3. 보상판매및 시덱스프로모션기간을 어필 구매전환 유도중"},{"type":"1차 설치교육","date":"2026-06-08","person":"이정은","clinic":"강남 루덴치과","addr":"서울특별시 서초구 서초대로77길 24 강남지웰타워2 7층","dealer":"네오바이오텍 (윤일환부장)","product":"i900c","contract":"네오판매","sn":"CF2605100031","note":"올케어 1차 설치 및 교육"},{"type":"데모교육","date":"2026-06-08","person":"박혜미","clinic":"송파 김석훈치과","addr":"오금로 422 연암빌딩","dealer":"네오바이오텍 (윤일환 부장)","product":"i900c","contract":"","sn":"","note":""},{"type":"데모교육","date":"2026-06-08","person":"이주호","clinic":"수원 좋은나무치과","addr":"수원시 영통구 중부대로 448번길 106","dealer":"메가젠 (이재석 대리)","product":"i900c","contract":"","sn":"","note":"1. i900M & PC 미러링 설치 및 일주일 대여 2. 기존 i700 사용중 3. 보상 판매로 구매 유도중"},{"type":"유지교육","date":"2026-06-08","person":"장건우","clinic":"성남 창조치과","addr":"경기 성남시 분당구 성남대로 385 분당클리닉 4층 401호","dealer":"티에네스(이승규 대리)","product":"i700","contract":"","sn":"","note":"i700 스캐너 연결 끊임 이슈, cx 팀 협조 요청, PC 포맷 후 체크 예정"},{"type":"데모교육","date":"2026-06-09","person":"이주호","clinic":"대구 오늘도원치과","addr":"대구 중구 태평로 50 상가 B02동 2층 218-221호","dealer":"모어덴 (안지수 팀장)","product":"i900c, i900m","contract":"","sn":"","note":"1. i900M, i900c & PC 일주일 대여 진행 2. R2i3, 샤이닝 3D 같이 데모 진행중 > 두 기종 다 마음에 들어하시진 않음 3. 시로나 유저로 비교 대상이 프라임, 스캐닝 성능(마진 표현, 메탈) 이슈로 구매 보류"},{"type":"데모교육","date":"2026-06-09","person":"이주호","clinic":"대구 탑연합치과","addr":"대구광역시 북구 침산로 93 7호","dealer":"티에네스 (박노우 차장)","product":"i900c","contract":"계약완료","sn":"CF2606100203","note":"1. i900M & PC 데모 시연 2. 케이스 진행 후 일주일 대여 요청으로 차주 진행 예정 3. 신규 구매 사이트, 샤이닝 3D 대여중"},{"type":"데모교육","date":"2026-06-09","person":"이정은","clinic":"강동 아틀라스치과","addr":"서울 강동구 성안로 7 강림빌딩","dealer":"메가젠 (곽승민 대리)","product":"i900M","contract":"","sn":"","note":"1. 900M & PC 미러링 데모 진행 2. i700 사용중 3. 보상판매를 유도하였으나, 현재 사용 중인 i700을 좀 더 사용하실 예정으로 확인됨."},{"type":"데모교육","date":"2026-06-09","person":"장건우","clinic":"송파 소중치과의원","addr":"서울 송파구 문정동 642-3","dealer":"","product":"i900 시리즈","contract":"","sn":"","note":"1. 기존 Cerec 사용 유저(위생사 분들은 메디트 IOS 사용 경험 有) 2. 현재 스캐너 사용 X, 대여 기간 조율 중 3. 추후 구매 시 연락 중인 메가젠 딜러를 통해 연락 예정"},{"type":"데모교육","date":"2026-06-09","person":"박혜미","clinic":"분당 연세미치과의원","addr":"경기 성남시 분당구 불정로 255","dealer":"허브바이오텍 (김태훈 차장)","product":"i900C","contract":"","sn":"","note":""},{"type":"데모교육","date":"2026-06-10","person":"이주호","clinic":"대구 아이큰숲치과","addr":"대구 수성구 달구벌대로 2273 수성메디칼센터 6층","dealer":"티에네스 (박노우 차장)","product":"i900m","contract":"계약완료","sn":"CF2606100215","note":"1. i900M & PC 데모 시연 2. 케이스 진행 후 일주일 대여 요청으로 차주 진행 예정 3. 아이테로 파손으로 1,700만원 수리비 청구 상태, 세라핀과 함께 영업중"},{"type":"1차 설치교육","date":"2026-06-10","person":"이정은","clinic":"금천 우리치과의원","addr":"서울 금천구 금하로 763 벽산중심상가","dealer":"네오: 조성우 차장,박경호 부장","product":"i900c","contract":"","sn":"","note":""},{"type":"1차 설치교육","date":"2026-06-10","person":"박혜미","clinic":"충무 바른치과의원","addr":"충무로 13 엘크루 메트로시티 5층","dealer":"허브바이오텍(송주원 대리)","product":"i900c","contract":"","sn":"","note":""},{"type":"기타","date":"2026-06-11","person":"윤채원","clinic":"성남 위례서울치과","addr":"경기도 성남시 수정구 위례광장로 310 우성트램타워 B동 8층","dealer":"네오바이오텍 (김유철)","product":"i900m&iPad","contract":"","sn":"","note":"1. 기존 트리오스유저 2. 장비 회수 및 팀장님 미팅을 진행, 사용 중 미러링 끊김 이슈와 Check Point App의 정확도, 신뢰도 및 프로세싱 속도 관련 피드백 전달 3. 장비 회수를 진행하였으며, 향후 i900 Classic과 메가젠 R2i3를 함께 비교 데모할 예정"},{"type":"데모교육","date":"2026-06-11","person":"윤채원","clinic":"용인 편한미소치과","addr":"경기 용인시 처인구 금령로90번길 1 덕윤빌딩 2층","dealer":"메가젠 (김주태 대리)","product":"i900 시리즈","contract":"","sn":"","note":"1. 기존 트리오스유저로 3일 대여진행 (i900m 과 i900c 모두 데모진행 및 대여중) 2. 현재 프라임스캐너와 함께 비교검토중, 미러링이 끊김 이슈로 i900C 함께 대여중. 기공물 제작 케이스가 하루에 5-6건으로 현재 잘 사용중이신것으로 보임 3. 6/16 장비회수와 함께 보철물 적합도 확인예정 추후 구매시 메가젠 딜러를 통해 구매예정"},{"type":"데모교육","date":"2026-06-11","person":"이주호","clinic":"제주 아나픈치과","addr":"노형로 362 태영빌딩 4층","dealer":"시덱스 컴플레인 사이트","product":"i900 시리즈","contract":"","sn":"","note":"1. 시덱스: i700 컴플레인 대응 및 i900시리즈 데모 유도로 진행 2. 2일 임상 케이스 데모 진행 3. i700 구매한 딜러 부재로 Prime Connect 구매, i900M 블리딩, 세라믹 케이스 스캔 불가로 구매 전환 어려움"},{"type":"1차 설치교육","date":"2026-06-11","person":"박혜미","clinic":"울산 BS교정치과","addr":"삼산로 254 8층","dealer":"네오바이오텍 (이정훈)","product":"i900c","contract":"","sn":"","note":"1. PC 구매 전 대여, 2주 후 연락 예정 2. 연락하면서 S/N확인 필요"},{"type":"데모교육","date":"2026-06-12","person":"박혜미","clinic":"이편한치과의원","addr":"전북 전주시 덕진구 솔내로 190","dealer":"허브바이오텍","product":"i900c","contract":"","sn":"","note":""},{"type":"유지교육","date":"2026-06-12","person":"장건우","clinic":"수원 뷰티덴치과","addr":"경기 수원시 팔달구 일월로22번길 17 4층 뷰티덴치과","dealer":"","product":"i700w","contract":"","sn":"","note":"1. SIDEX CX 접수 건 2. i700w 현장 장비 점검으로 스캐너 및 허브 이슈 X 3. 더바츠에서 제공한 A to C cable 와 Hub 연결 후 이슈 종료"},{"type":"데모교육","date":"2026-06-12","person":"장건우","clinic":"시흥 우리들치과","addr":"경기 시흥시 목감남서로 9-19 3층","dealer":"","product":"i900c, i900m","contract":"","sn":"","note":"1. 기존 i500 사용 유저(원장님, 위생사분들), i900C & PC 일주일 대여 진행 19일 회수 예정 2. 현재 R2i3 사용 중 3. SIDEX 기간 내 클로징 어려움, 하지만 MEDIT에 매우 긍정적, 추후 구매 시 별도 연락 예정"},{"type":"데모교육","date":"2026-06-12","person":"윤채원","clinic":"송파 서울심치과","addr":"서울시 송파구 마천로 57길 7 2층","dealer":"네오바이오텍","product":"i900c","contract":"","sn":"","note":"1. 트리오스 데모경험 치과 2. 환자 데모로 진행하여 6/15 보철물 적합도 확인 할예정 ( 6.23 보철물 확인 ) 3. 구매시 네오바이오텍 딜러를 통해 전달예정 (29일 월요일 미팅예정)"},{"type":"데모교육","date":"2026-06-12","person":"윤채원","clinic":"서울역 허브치과","addr":"서울 중구 세종대로 27 HM빌딩 5층","dealer":"","product":"i900c, i900m","contract":"","sn":"","note":"1. 스캐너 사용 경험이 전혀 없는 치과 2. 선생님들 대상으로 구강스캐너 기본 교육 및 메디트 스캐너 시연 3. 구매 가능성은 낮으나, 구매 시 네오바이오텍을 통해 진행 예정"},{"type":"데모교육","date":"2026-06-15","person":"박혜미","clinic":"성북구 J스타일 치과","addr":"서울 성북구 동소문로 106 유타몰 6층","dealer":"허브바이오텍","product":"i900c, i900m","contract":"","sn":"","note":"12:30/ SIDEX 접수 - 6/15일 기준 5일 대여 시작 22일 회수예정"},{"type":"데모교육","date":"2026-06-16","person":"이주호","clinic":"대구 경대웰치과","addr":"대구 달성군 화원읍 사문진로 447","dealer":"티에네스 (권노우 차장)","product":"i900 시리즈","contract":"계약완료","sn":"7월 6일 or 8일","note":"1. 스캐너 사용 경험 無 2. 현재 샤이닝 3D와 도입 고민중 3. 6월 말까지 시덱스 프로모션 가능 안내, 지속적으로 팔로업 예정"},{"type":"기타","date":"2026-06-16","person":"이주호","clinic":"대구 오늘도원치과","addr":"대구 중구 태평로 50 상가 B02동 2층 218-221호","dealer":"티에네스 (권노우 차장)","product":"i900 시리즈","contract":"","sn":"","note":"장비 회수 및 치과 미팅"},{"type":"데모교육","date":"2026-06-16","person":"장건우","clinic":"광명 안재현치과","addr":"경기 광명시 하안동 702","dealer":"메가젠 (김성희 과장)","product":"i900c, i900m","contract":"","sn":"","note":"1. 스캐너 사용 경험 無 2. 현재 프라임, 트리오스 데모 진행 중(메가젠에서 프라임 진행), 선생님들 대상으로 i900C 사용 교육 진행 3. 6월 말까지 스캐너 도입 고려 중, MEDIT 국내 기업의 강점과 SIDEX Promotion으로 원장님, 실장님과 연락 진행 중"},{"type":"데모교육","date":"2026-06-16","person":"박혜미","clinic":"연세SK치과의원","addr":"용인시 수지구 정평로 34-2","dealer":"","product":"i900c, i900m","contract":"","sn":"","note":"12:00/ SIDEX 접수"},{"type":"기타","date":"2026-06-16","person":"박혜미","clinic":"용인 편한미소치과","addr":"경기 용인시 처인구 금령로90번길 1 덕윤빌딩 2층","dealer":"메가젠 (김주태 대리)","product":"i900 시리즈","contract":"","sn":"","note":"장비 회수 및 치과 미팅"},{"type":"데모교육","date":"2026-06-16","person":"이정은","clinic":"부천 노블리안치과","addr":"경기 부천시 원미구 신흥로 197","dealer":"","product":"i900c, i900m","contract":"","sn":"","note":"1. 프라임 사용중 2. 차주에 환자 데모 요청 3. 현재 치과(인천 삼산) 이전 준비로 8월에 구매 필요"},{"type":"데모교육","date":"2026-06-16","person":"윤채원","clinic":"드림분당예치과병원","addr":"경기 성남시 분당구 황새울로258번길 37 흥국생명빌딩 2층","dealer":"티에네스 (이승준 대리)","product":"i900c, i900m","contract":"","sn":"","note":"1. 프라임, 트리오스 데모진행중 2. 원장님께서 선생님들의 편의성을 제일 중요하게 생각하심, 소아치과 및 교정케이스 많음 3. 6/24 장비회수와 동시에 보철물 및 케이스 확인예정"},{"type":"기타","date":"2026-06-17","person":"이주호","clinic":"대구 아이큰숲치과","addr":"대구 수성구 달구벌대로 2273 수성메디칼센터 6층","dealer":"티에네스 (권노우 차장)","product":"i900 시리즈","contract":"","sn":"","note":"데모 시연 후 대여 진행, 차주 수요일 회수"},{"type":"기타","date":"2026-06-17","person":"","clinic":"대구 탑연합치과","addr":"대구광역시 북구 침산로 93 7호","dealer":"","product":"","contract":"","sn":"","note":""},{"type":"데모교육","date":"2026-06-17","person":"이정은","clinic":"서울 바른 휘치과","addr":"미추홀대로 551 4층 서울바른휘치과","dealer":"네오 바이오텍 송명원차장, 이준기 과장","product":"i900m","contract":"","sn":"","note":"1. 샤이닝 사용중 2. i900m& 아이패드 속도 성능에 만족,3일 대여(22일 오전 회수예정) 3. 메탈스캔이슈, 다른 데모 예정으로 데모후 결정예정"},{"type":"2차 설치교육","date":"2026-06-17","person":"박혜미","clinic":"부산 방경환치과","addr":"명륜로103번길 3 101호","dealer":"","product":"i700w","contract":"","sn":"","note":"2차 교육 및 방경환 원장님(세미나 연자) 미팅"},{"type":"1차 설치교육","date":"2026-06-17","person":"장건우","clinic":"365올케어치과","addr":"서울 중구 동호로 171 더그레이스빌딩 4층","dealer":"티에네스 (권준형 과장)","product":"i900m","contract":"","sn":"","note":"1차설치교육 및 장비점검"},{"type":"유지교육","date":"2026-06-17","person":"장건우","clinic":"김준엽치과의원","addr":"서울 강남구 언주로 846 5층","dealer":"","product":"i900m","contract":"","sn":"","note":"MEDIT KOL 김준엽 원장님, Mac 사용으로 인한 MEDIT Link 사용 교육"},{"type":"데모교육","date":"2026-06-18","person":"박혜미","clinic":"부산 서구 보스톤치과","addr":"부산광역시 서구 구덕로 113 방재빌딩 3층","dealer":"덴티스 (차명환 과장)","product":"i900 시리즈","contract":"","sn":"","note":""},{"type":"1차 설치교육","date":"2026-06-18","person":"이정은","clinic":"더 시카고 치과","addr":"영동대로96길 34 대윤빌딩 지하1층","dealer":"네오 (문상현)","product":"i900c","contract":"","sn":"","note":""},{"type":"데모교육","date":"2026-06-18","person":"장건우","clinic":"사당 신성치과","addr":"서울 동작구 동작대로 7 신광빌딩6층","dealer":"","product":"i900c, i900m","contract":"","sn":"","note":"1. 구강스캐너 경험 無"},{"type":"기타","date":"2026-06-19","person":"윤채원","clinic":"동탄 경승현치과","addr":"경기 화성시 동탄구 동탄대로시범길 134 카림상가 2층 2021호","dealer":"티에네스 (권준형 과장)","product":"i900c, i900m","contract":"","sn":"","note":"장비회수 및 케이스확인, i700과 i900c 로 같은케이스 보철물 제작중 보철물의 적합도가 구매의 큰 포인트"},{"type":"기타","date":"2026-06-19","person":"윤채원","clinic":"성남 위례서울치과","addr":"경기도 성남시 수정구 위례광장로 310 우성트램타워 B동 8층","dealer":"네오바이오텍 (김유철)","product":"i900c","contract":"","sn":"","note":"i900m 회수 후 i900c 2차데모 진행"},{"type":"데모교육","date":"2026-06-19","person":"장건우","clinic":"남양주 이루어치과","addr":"경기 남양주시 다산순환로 350 KB골든타워 5층 506호, 507호","dealer":"허브바이오텍 (유재현 차장)","product":"i900c","contract":"계약완료","sn":"CF2605100017","note":"1. 구강스캐너 경험 無 2. 장비 6/24 까지 대여하며 환자 4케이스 예정 및 스탭선생님들끼리 연습 3. 투명교정을 위해 구매, 계약 완"},{"type":"데모교육","date":"2026-06-19","person":"이정은","clinic":"부천 고운이치과의원","addr":"경기 부천시 소사구 소사본동 소사동로 82 샌트럴프라자 303호","dealer":"","product":"i900c","contract":"","sn":"","note":"1. i700 장비점검 함께 진행 (끊김 이슈) 2. 스텝 스캔 미숙으로 인한 이슈로 스캔교육과 관리법 설명으로 해결완료/ SIDEX 접수 3. 스캐너 교육 진행하였으며, 장비 교체 시점으로는 아직 이르다는 의견을 보임."},{"type":"데모교육","date":"2026-06-19","person":"박혜미","clinic":"강남 임플라인치과의원","addr":"서울 강남구 삼성동 154-10","dealer":"허브바이오텍 (김태훈 차장)","product":"i900c","contract":"","sn":"","note":"올데이 임상 데모 진행"},{"type":"데모교육","date":"2026-06-19","person":"이주호","clinic":"병점 든든한치과","addr":"효행로 1065 나라프라자 4층","dealer":"메가젠 (최석철 팀장)","product":"i900 시리즈","contract":"","sn":"","note":"1. i700 연결 불량, S/W 다운 이슈로 컴플레인 접수 2. 케이블, 허브 특이사항 없음, PC 이슈 가능성으로 원장님 및 스탭분들한테 안내 완료, PC 설정 변경하여 FPS 높여드림 3. i900c 원장님께만 시연 완료, 추후 환자 케이스 진행 시 대여 요청하심"},{"type":"데모교육","date":"2026-06-22","person":"이주호","clinic":"종로 신세계치과","addr":"서울 종로구 송월길 99 상가 2층","dealer":"네오바이오텍 (윤일환 부장)","product":"i900c, i700","contract":"","sn":"","note":"1. i900c 일주일 대여 진행 2. CS3800, Aoral 데모 받아보신 상태 3. 저가 스캐너중 구매 고려중"},{"type":"데모교육","date":"2026-06-22","person":"장건우","clinic":"노원 마음에치과","addr":"서울 노원구 동일로 1101 3층","dealer":"","product":"i900m&iPad","contract":"","sn":"","note":"1. i900m&iPad 관심 - 2026 06 26 회수 2. 프라임, 트리오스, 샤이닝 전부 데모 받았으나 iPad 연동에 매력을 느껴 메디트를 선호하였음 3. 하지만 Metal scan이 잘 되지 않아 고민 중. 너무 좋은데 Metal scan이 안 되어서 대여하면서 비교해볼 예정"},{"type":"기타","date":"2026-06-22","person":"이정은","clinic":"서울 바른 휘치과","addr":"미추홀대로 551 4층 서울바른휘치과","dealer":"","product":"i900m&iPad","contract":"","sn":"","note":"장비회수"},{"type":"기타","date":"2026-06-22","person":"박혜미","clinic":"성북구 J스타일 치과","addr":"서울 성북구 동소문로 106 유타몰 6층","dealer":"허브바이오텍","product":"i900c","contract":"","sn":"","note":""},{"type":"기타","date":"2026-06-23","person":"이주호","clinic":"해운대 하이엘치과","addr":"부산 해운대구 마린시티2로 2","dealer":"네오 (이강기 부장)","product":"i500, i700","contract":"","sn":"","note":"스캐너 교육 부재로 현재 사용 못하고 계심, 사용 교육 진행 후 i900c 데모 유도 계획"},{"type":"기타","date":"2026-06-23","person":"이주호","clinic":"부산 서구 보스톤치과","addr":"부산광역시 서구 구덕로 113 방재빌딩 3층","dealer":"덴티스 (차명환 과장)","product":"i900c, i900m","contract":"","sn":"","note":"일주일 대여 장비 회수 - 스캔 데이터 퀄리티 불만족으로 구매 보류"},{"type":"데모교육","date":"2026-06-23","person":"윤채원","clinic":"용인 카이스트치과","addr":"용인시 수지구 수풍로 107 3층 (카이스트 치과)","dealer":"","product":"i900c","contract":"","sn":"","note":"1. 사용중이신 스캐너 없음 2. 스캐너 처음 사용하시는 선생님 및 전 치과에서 트리오스 사용하신 선생님 교육진행, 데모 스캔중 스캔바디 스캔 안됨(덴티움 스캔바디) 3. 6/25까지 사용후 금요일 클로징예정 (퀵 회수 예정) / 추후 도입예정"},{"type":"기타","date":"2026-06-23","person":"윤채원","clinic":"양재 연세굿데이치과","addr":"서울특별시 서초구 강남대로 206 엔스빌딩 5-6층","dealer":"","product":"","contract":"","sn":"","note":"7월 12일 광주 스킬업 클래스 미팅"},{"type":"데모교육","date":"2026-06-23","person":"이정은","clinic":"중랑 아름드리치과","addr":"서울 중랑구 동일로 911 2층","dealer":"","product":"i900c, i900m","contract":"","sn":"","note":"1. i700w 유저 2. 스캔끊김이슈와 데모요청-끊김은 거울오염, 사용미숙, 장비이상 무 3. 스캐너 교육 진행하였으며, 장비 교체 시점으로는 아직 이르다는 의견을 보임."},{"type":"데모교육","date":"2026-06-23","person":"장건우","clinic":"영등포 연세더순수치과의원","addr":"서울 영등포구 문래로 87 2층","dealer":"허브바이오텍(송주원 대리)","product":"i900c, i900m","contract":"계약완료","sn":"CF2606100240","note":"1. i600 유저 - i900C 대여 2. 데스크탑을 통하여 사용 중, 원장님이 메디트에 많은 관심을 가지고 계심. 3. 영업사원을 통해 SIDEX Promotion, All care service 설명. (보상판매말고 단품 구매를 희망하심)"},{"type":"데모교육","date":"2026-06-24","person":"이정은","clinic":"서울 예성치과의원","addr":"서울 서대문구 응암로 113 2층","dealer":"네오바이오텍 (박경호 부장)","product":"i700, i900c","contract":"","sn":";","note":""},{"type":"2차 설치교육","date":"2026-06-24","person":"이정은","clinic":"금천 우리치과의원","addr":"서울 금천구 금하로 763 벽산중심상가","dealer":"","product":"i900c, i900m","contract":"","sn":"","note":""},{"type":"데모교육","date":"2026-06-24","person":"윤채원","clinic":"구로 구로좋은치과","addr":"서울시 구로구 구로동로 115 청보빌딩 5층","dealer":"덴티스 (조성국 과장)","product":"i900c","contract":"","sn":"","note":"1. 현재 i700w 사용유저 2. 선생님들모두 잘사용중이셨으나, i900c의 퍼포먼스 및 강점 비교하여 데모진행 3. 덴티스와 거래중이라고 하심, 보상판매 및 프로모션등 전달완료 (06.26 오전 장비 퀵 회수예정)"},{"type":"기타","date":"2026-06-24","person":"윤채원","clinic":"성남 위례서울치과","addr":"경기도 성남시 수정구 위례광장로 310 우성트램타워 B동 8층","dealer":"네오바이오텍 (김유철)","product":"i900c","contract":"","sn":"","note":"메가젠, 프라임, i900c 현재 동시 데모진행중으로 김유철지점장님과 함께 방문하여 보철물 적합도 및 중간점검으로 방문"},{"type":"기타","date":"2026-06-22","person":"윤채원","clinic":"드림분당예치과병원","addr":"경기 성남시 분당구 황새울로258번길 37 흥국생명빌딩 2층","dealer":"티에네스 (이승준 대리)","product":"i900c, i900m","contract":"","sn":"","note":"장비회수 및 미팅"},{"type":"기타","date":"2026-06-24","person":"이주호","clinic":"대구 경대웰치과","addr":"대구 달성군 화원읍 사문진로 447","dealer":"티에네스 (박노우 차장)","product":"i900c","contract":"","sn":"","note":"장비 데모 대여 요청, 스탭 교육 후 임상 서포트"},{"type":"기타","date":"2026-06-24","person":"이주호","clinic":"대구 아이큰숲치과","addr":"대구 수성구 달구벌대로 2273 수성메디칼센터 6층","dealer":"티에네스 (박노우 차장)","product":"i900c","contract":"","sn":"","note":"일주일 대여 장비 회수, 미팅 진행"},{"type":"기타","date":"2026-06-25","person":"","clinic":"대구 탑연합치과","addr":"대구광역시 북구 침산로 93 7호","dealer":"","product":"i900c","contract":"","sn":"","note":""},{"type":"기타","date":"2026-06-25","person":"이정은","clinic":"사당 신성치과","addr":"서울 동작구 동작대로 7 신광빌딩6층","dealer":"허브바이오텍 송주원 대리","product":"i900c","contract":"","sn":"","note":"2차 데모"},{"type":"데모교육","date":"2026-06-25","person":"이정은","clinic":"시흥 서울보스톤고른이치과의원","addr":"경기 시흥시 중심상가3길 10-1 지성빌딩","dealer":"메가젠 김태건 주임","product":"i900c","contract":"계약완료","sn":"7/16 (목) 설치교육","note":"Ortho Simulation, MOS안내 필요"},{"type":"데모교육","date":"2026-06-26","person":"장건우","clinic":"군산 고향도치과의원","addr":"전북 군산시 수송로 137 3층 고향도치과의원","dealer":"덴티스","product":"i900m","contract":"","sn":"","note":"11:00 무선과 유선의 차이점 궁금"},{"type":"데모교육","date":"2026-06-26","person":"이주호","clinic":"경주 바른이치과","addr":"화랑로 107 3층","dealer":"티에네스 (박노우 차장)","product":"i900 시리즈","contract":"계약완료","sn":"7/14(화) 설치 교육","note":"1. 울산BS교정치과 원장님 소개 2. 현장 데모 후 구매 계약 3. 세라핀, 엔젤얼라이너 활용 예정"},{"type":"기타","date":"2026-06-26","person":"이정은","clinic":"사당 신성치과","addr":"서울 동작구 동작대로 7 신광빌딩6층","dealer":"허브바이오텍 송주원 대리","product":"i900c","contract":"","sn":"","note":"2차 데모"},{"type":"기타","date":"2026-06-26","person":"이정은","clinic":"서울 예성치과의원","addr":"서울 서대문구 응암로 113 2층","dealer":"네오바이오텍 (박경호 부장)","product":"i900c","contract":"","sn":"","note":"장비회수 및 환자 데모 요청"},{"type":"기타","date":"2026-06-29","person":"윤채원","clinic":"성남 위례서울치과","addr":"경기도 성남시 수정구 위례광장로 310 우성트램타워 B동 8층","dealer":"네오바이오텍 (김유철)","product":"i900c","contract":"","sn":"","note":"네오바이오텍과 동행하여 장비회수 및 클로징 방문"},{"type":"유지교육","date":"2026-06-29","person":"이주호","clinic":"대전 조경엽치과","addr":"계족로 667 대덕빌딩 3층","dealer":"네오바이오텍 (박세환)","product":"i700","contract":"","sn":"","note":"스캔 후 바이트 이슈로 컴플레인 요청"},{"type":"유지교육","date":"2026-06-29","person":"이주호","clinic":"보령 대천치과","addr":"번영로 25","dealer":"네오바이오텍 (박세환)","product":"i700","contract":"","sn":"","note":"스캐너 교육 및 퍼포먼스 저하 컴플레인 요청"},{"type":"기타","date":"2026-06-30","person":"장건우","clinic":"영등포 연세더순수치과의원","addr":"서울 영등포구 문래로 87 2층","dealer":"허브바이오텍(송주원 대리)","product":"i900c, i900m","contract":"","sn":"","note":"SIDEX2026 Promotion 건 클로징 미팅"},{"type":"데모교육","date":"2026-06-30","person":"이정은","clinic":"성남 연세미치과의원","addr":"경기 성남시 분당구 불정로 255","dealer":"허브바이오텍 (김태훈 차장)","product":"i900C","contract":"계약완료","sn":"","note":"보철적합대기"},{"type":"기타","date":"2026-07-01","person":"윤채원","clinic":"용인 편한미소치과","addr":"경기 용인시 처인구 금령로90번길 1 덕윤빌딩 2층","dealer":"메가젠 (김주태 대리)","product":"i900 시리즈","contract":"","sn":"","note":"장비 회수 및 치과 미팅"},{"type":"기타","date":"2026-07-01","person":"이주호","clinic":"대구 경대웰치과","addr":"대구 달성군 화원읍 사문진로 447","dealer":"티에네스 (박노우 차장)","product":"i900c","contract":"","sn":"","note":"대여 장비 회수(HODEX 활용), 원장님 미팅 후 교육 일정 조율"},{"type":"2차 설치교육","date":"2026-07-02","person":"윤채원","clinic":"365올케어치과","addr":"서울 중구 동호로 171 더그레이스빌딩 4층","dealer":"티에네스 (권준형 과장)","product":"i900m","contract":"","sn":"","note":"2차설치교육 및 장비점검"},{"type":"데모교육","date":"2026-07-02","person":"윤채원","clinic":"예스미르치과의원","addr":"서울 강동구 고덕비스타빌리로 26","dealer":"허브바이오텍 (이원창)","product":"i900시리즈","contract":"","sn":"","note":"원장님 미팅 및 데모 진행"},{"type":"기타","date":"2026-07-02","person":"이정은","clinic":"인천 연세 내일 치과","addr":"인천 미추홀구 경인로 131 4층","dealer":"네오 송명원 차장님","product":"i700","contract":"","sn":"","note":"i700 재교육 요청"},{"type":"1차 설치교육","date":"2026-07-02","person":"이주호","clinic":"대구 아이큰숲치과","addr":"대구 수성구 달구벌대로 2273 수성메디칼센터 6층","dealer":"티에네스 (박노우 차장)","product":"i900m","contract":"","sn":"","note":"올케어 설치 교육"},{"type":"1차 설치교육","date":"2026-07-03","person":"이주호","clinic":"김해 진영마미치과","addr":"경남 김해시 진영읍 진영리 1626-2","dealer":"모어덴 (안지수 팀장)","product":"i900c","contract":"","sn":"","note":"올케어 설치 교육"},{"type":"1차 설치교육","date":"2026-07-03","person":"이정은","clinic":"남양주 이루어치과","addr":"경기 남양주시 다산순환로 350 KB골든타워 5층 506호, 507호","dealer":"허브바이오텍 (유재현 차장)","product":"i900c","contract":"","sn":"","note":"올케어 설치 교육"},{"type":"데모교육","date":"2026-07-05","person":"이주호","clinic":"광주 아름다운E치과 교정과","addr":"제석로 104 HR메디웰 202동 7층 아름다운e치과교정과치과의원","dealer":"티에네스 (이경열 부장)","product":"i900c","contract":"계약완료","sn":"","note":"HODEX 현장 데모 건"},{"type":"데모교육","date":"2026-07-06","person":"이정은","clinic":"인천 비에스 치과","addr":"인천광역시 제물포구 샛골로 212 2층","dealer":"네오 바이오텍 민경우 팀장","product":"i900c, i900m","contract":"","sn":"","note":"1. i600, i700유저로 600보상판매 고려 2. 600대비 성능 스펙 가동성에 만족함. 3. 차주 월요일 시로나 데모 후 결정"},{"type":"기타","date":"2026-07-06","person":"장건우","clinic":"동대문 플러스덴치과의원","addr":"서울 동대문구 사가정로 122 전농동하우스토리 304,305,306호","dealer":"네오바이오텍","product":"i700","contract":"","sn":"","note":"설치 후 교육을 받지 못하여 교육 요청, SIDEX 부스 방문으로 i900C 시연도 함께 요청"},{"type":"1차 설치교육","date":"2026-07-07","person":"이주호","clinic":"대구 탑연합치과","addr":"대구광역시 북구 침산로 93 7호","dealer":"티에네스 (박노우 차장)","product":"i900c","contract":"","sn":"","note":"올케어 설치 교육"},{"type":"1차 설치교육","date":"2026-07-08","person":"이주호","clinic":"대구 경대웰치과","addr":"대구 달성군 화원읍 사문진로 447","dealer":"티에네스 (박노우 차장)","product":"i900c","contract":"","sn":"","note":"올케어 설치 교육"},{"type":"기타","date":"2026-07-09","person":"장건우","clinic":"여의도 애플치과의원","addr":"서울 영등포구 국제금융로8길 19 중앙빌딩 201호, 206호","dealer":"","product":"i900m","contract":"","sn":"","note":"i900M Clinic wifi 및 무선 환경 확인, set-up"},{"type":"기타","date":"2026-07-09","person":"이정은","clinic":"서울복음치과","addr":"서울특별시 영등포구 국제금융로 86 롯데캐슬아이비 2층","dealer":"pm 이상훈님 동행","product":"i900","contract":"","sn":"","note":"i900(터치) 이슈 방문"},{"type":"1차 설치교육","date":"2026-07-09","person":"이주호","clinic":"포항 신세계치과","addr":"경상북도 포항시 북구 두호로 24 그랜드빌딩","dealer":"네오바이오텍 (정철우 센터장)","product":"i900m","contract":"","sn":"","note":"올케어 설치 교육"},{"type":"유지교육","date":"2026-07-10","person":"이주호","clinic":"창원 서린치과","addr":"창이대로309번길 5 낙원빌딩301호","dealer":"네오바이오텍 (김성민 계장)","product":"i700","contract":"","sn":"","note":"스캐너 연결 불량 컴플레인 및 교육 부재로 Pre-service 요청"},{"type":"데모교육","date":"2026-07-10","person":"이정은","clinic":"부천 오세욱치과","addr":"경기 부천시 원미구 장말로 135","dealer":"","product":"i700, i900c, i900m","contract":"","sn":"","note":"데모및 일주일 데모 요청 12:00"},{"type":"1차 설치교육","date":"2026-07-10","person":"장건우","clinic":"영등포 연세더순수치과의원","addr":"서울 영등포구 문래로 87 2층","dealer":"허브바이오텍 (송주원 대리)","product":"i900c","contract":"","sn":"","note":"올케어 설치 교육, 데스크탑 점검도 함께 진행 예정(스캐너 연결 끊김 현상 발생, 전력공급파워사용중)"},{"type":"데모교육","date":"2026-07-13","person":"윤채원","clinic":"서울 그루터기치과의원 이수점","addr":"서울 서초구 동작대로 118 방배동예다인프라자빌딩 5층","dealer":"덴티스 (주경완 지점장)","product":"I900c","contract":"","sn":"","note":"원장님 미팅 및 데모 진행예정"},{"type":"기타","date":"2026-07-10","person":"이정은","clinic":"부천 오세욱치과","addr":"경기 부천시 원미구 장말로 135","dealer":"","product":"i700, i900c, i900m","contract":"","sn":"","note":"데모및 일주일 데모 요청 ,라우터 설치"},{"type":"1차 설치교육","date":"2026-07-14","person":"이주호","clinic":"경주 바른이치과","addr":"화랑로 107 3층","dealer":"티에네스 (박노우 차장)","product":"i900c","contract":"","sn":"","note":"올케어 설치 교육"},{"type":"기타","date":"2026-07-14","person":"이정은","clinic":"박춘배 치과","addr":"","dealer":"","product":"","contract":"","sn":"","note":""},{"type":"기타","date":"2026-07-14","person":"","clinic":"이재호 치과","addr":"","dealer":"","product":"","contract":"","sn":"","note":""},{"type":"데모교육","date":"2026-07-14","person":"윤채원","clinic":"강남 화이트 스타일 치과의원","addr":"서울 강남구 강남대로92길 17 대승빌딩 B1층, 1층, 2층","dealer":"허브바이오텍 (유재현 차장)","product":"i900c","contract":"","sn":"","note":"데모 및 일주일 데모 요청 13:00"},{"type":"데모교육","date":"2026-07-15","person":"이주호","clinic":"대구 아이샘치과","addr":"팔거천동로 217 2층","dealer":"티에네스 (박노우 차장)","product":"i900c","contract":"","sn":"","note":"데모 및 일주일 대여 요청"},{"type":"1차 설치교육","date":"2026-07-16","person":"장건우","clinic":"순천의료원","addr":"전남광주 순천시 서문성터길 2","dealer":"","product":"i900","contract":"","sn":"","note":"대한치과의사협회"},{"type":"1차 설치교육","date":"2026-07-16","person":"이정은","clinic":"시흥 서울보스톤고른이치과의원","addr":"경기 시흥시 중심상가3길 10-1 지성빌딩","dealer":"메가젠 김태건 주임","product":"i900c","contract":"","sn":"","note":"M/L 12:30"},{"type":"기타","date":"2026-07-23","person":"윤채원","clinic":"부산 방경황동행치과의원","addr":"명륜로103번길 3 101호","dealer":"-","product":"i900c i700","contract":"","sn":"","note":"Education&kol팀 이원정 파트장님과 동행하여 미팅예정"}];
+function seedToObj(){ return SEED.map((o,i)=>({id:"s"+i,...o})); }
+
+/* ============ STORAGE ============ */
+const KEY="medit_visits_v2";
+let store={ok:false};
+try{ const t="__t";localStorage.setItem(t,"1");localStorage.removeItem(t);store.ok=true; }catch(e){store.ok=false;}
+let DATA=[], savedAt="";
+function load(){
+  if(store.ok){
+    try{ const raw=localStorage.getItem(KEY);
+      if(raw){const p=JSON.parse(raw);DATA=p.rows||[];savedAt=p.at||"";return;} }catch(e){}
+  }
+  DATA=seedToObj(); save();
+}
+function save(){
+  savedAt=new Date().toLocaleString("ko-KR",{month:"long",day:"numeric",hour:"2-digit",minute:"2-digit"});
+  if(store.ok){ try{ localStorage.setItem(KEY,JSON.stringify({rows:DATA,at:savedAt})); }catch(e){} }
+}
+function uid(){ return "v"+Date.now().toString(36)+Math.floor(performance.now()).toString(36); }
+
+/* ============ STATE ============ */
+let fTypes=[], fPerson="전체", fStatus="전체", q="", editId=null, selProducts=[], fMonth="", curMonth="", sortDesc=true;
+
+/* ============ RENDER: DASHBOARD ============ */
+function esc(s){return (s||"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));}
+function prodList(s){return (s||"").split(",").map(x=>x.trim()).filter(Boolean);}
+
+function renderDash(){
+  const rows=DATA.slice();
+  document.getElementById("hdrCount").textContent=rows.length+" 건";
+  // month = latest month in data
+  const months=[...new Set(rows.map(r=>r.date.slice(0,7)))].sort().reverse();
+  const cur=months[0]||"2026-07";
+  curMonth=cur;
+  const monthRows=rows.filter(r=>r.date.slice(0,7)===cur);
+  const [y,m]=cur.split("-");
+  document.getElementById("dashMonth").textContent=`${y}년 ${+m}월`;
+  document.getElementById("dashRange").textContent=`이번 달 ${monthRows.length}건 · 전체 ${rows.length}건`;
+
+  const install=monthRows.filter(r=>r.type.includes("설치교육")).length;
+  const demo=monthRows.filter(r=>r.type==="데모교육").length;
+  const deals=monthRows.filter(r=>r.contract).length;
+  const kpis=[
+    {lab:"이번 달 방문",val:monthRows.length,sub:"전체 "+rows.length+"건",acc:"#004fec",kind:"all"},
+    {lab:"계약 완료",val:deals,sub:"이번 달 성사",acc:"#16a34a",kind:"contract"},
+    {lab:"설치 교육",val:install,sub:"1차+2차",acc:"#1a63f5",kind:"install"},
+    {lab:"데모 교육",val:demo,sub:"제품 시연",acc:"#6d54b5",kind:"demo"},
+  ];
+  document.getElementById("kpiGrid").innerHTML=kpis.map(k=>`
+    <div class="kpi" style="--acc:${k.acc}" onclick="kpiGo('${k.kind}')">
+      <div class="lab">${k.lab}<span class="kpi-arrow">›</span></div>
+      <div class="val tnum">${k.val}<small>건</small></div>
+      <div class="sub">${k.sub}</div>
+    </div>`).join("");
+
+  // by person (this month)
+  const pc=PEOPLE.map(p=>({p,n:monthRows.filter(r=>r.person===p).length}));
+  const pmax=Math.max(1,...pc.map(x=>x.n));
+  document.getElementById("byPerson").innerHTML=pc.map(x=>`
+    <div class="bar-row clk" onclick="goPerson('${x.p}')">
+      <span class="nm">${x.p}</span>
+      <div class="bar-track"><div class="bar-fill" style="width:${x.n/pmax*100}%;background:${PERSON_COLOR[x.p]}"></div></div>
+      <span class="ct tnum">${x.n}</span>
+      <span class="row-chev">›</span>
+    </div>`).join("")
+    +`<div class="tap-hint">이름을 탭하면 해당 담당자 방문만 보기 ›</div>`;
+
+  // by type (this month)
+  document.getElementById("byType").innerHTML=TYPES.map(t=>{
+    const n=monthRows.filter(r=>r.type===t.k).length;
+    return `<div class="dist-chip clk" onclick="goType('${t.k}')"><span class="dot" style="background:${t.c}"></span>${t.k}<span class="n">${n}</span></div>`;
+  }).join("");
+
+  // by product (this month) — count across multi-product cells
+  const prodCount={};
+  monthRows.forEach(r=>prodList(r.product).forEach(p=>{const key=p.replace(/\s*시리즈/,"");prodCount[key]=(prodCount[key]||0)+1;}));
+  const pe=Object.entries(prodCount).sort((a,b)=>b[1]-a[1]);
+  document.getElementById("byProduct").innerHTML= pe.length? pe.map(([p,n])=>
+    `<div class="dist-chip clk" onclick="goProduct('${esc(p)}')"><span class="dot" style="background:#004fec"></span>${esc(p)}<span class="n">${n}</span></div>`).join("")
+    : `<span style="color:var(--ink-3);font-size:12.5px">데이터 없음</span>`;
+}
+
+/* ============ RENDER: LIST ============ */
+function renderFilters(){
+  const ft=document.getElementById("filterType");
+  ft.innerHTML=`<span class="frow-lab">구분</span>`
+    +`<button class="fchip ${fTypes.length===0?'on':''}" onclick="setAllTypes()">전체</button>`
+    +TYPES.map(t=>`<button class="fchip ${fTypes.includes(t.k)?'on':''}" onclick="toggleType('${t.k}')">${t.k}</button>`).join("");
+  const fp=document.getElementById("filterPerson");
+  fp.innerHTML=`<span class="frow-lab">담당자</span>`
+    +["전체",...PEOPLE].map(p=>`<button class="fchip ${fPerson===p?'on':''}" onclick="setFPerson('${p}')">${p}</button>`).join("");
+  const fs=document.getElementById("filterStatus");
+  fs.innerHTML=`<span class="frow-lab">상태</span>`
+    +["전체","계약완료","진행중"].map(s=>`<button class="fchip ${fStatus===s?'on':''}" onclick="setFStatus('${s}')">${s}</button>`).join("");
+}
+function setAllTypes(){fTypes=[];renderFilters();renderList();}
+function toggleType(k){const i=fTypes.indexOf(k);if(i>=0)fTypes.splice(i,1);else fTypes.push(k);renderFilters();renderList();}
+function setFPerson(p){fPerson=p;renderFilters();renderList();}
+function setFStatus(s){fStatus=s;renderFilters();renderList();}
+function toggleSort(){sortDesc=!sortDesc;renderList();}
+// 공통: 필터를 지정하고 목록으로 이동 (칩까지 실제 선택됨)
+function goList(o){
+  o=o||{};
+  fTypes=(o.types||[]).slice();
+  fPerson=o.person||"전체";
+  fStatus=o.status||"전체";
+  q=o.query||"";
+  fMonth=("month" in o)?o.month:curMonth;
+  const s=document.getElementById("search");if(s)s.value=q;
+  renderFilters();renderList();switchView("list");
+}
+function kpiGo(kind){
+  if(kind==="demo") goList({types:["데모교육"]});
+  else if(kind==="install") goList({types:["1차 설치교육","2차 설치교육"]});
+  else if(kind==="contract") goList({status:"계약완료"});
+  else goList({});
+}
+function goPerson(p){ goList({person:p}); }
+function goType(k){ goList({types:[k]}); }
+function goProduct(p){ goList({query:p}); }
+function clearFilters(){fTypes=[];fPerson="전체";fStatus="전체";q="";fMonth="";const s=document.getElementById("search");if(s)s.value="";renderFilters();renderList();}
+
+function filtered(){
+  const qq=q.trim().toLowerCase();
+  return DATA.filter(r=>{
+    if(fTypes.length && !fTypes.includes(r.type)) return false;
+    if(fPerson!=="전체" && r.person!==fPerson) return false;
+    if(fStatus==="계약완료" && !r.contract) return false;
+    if(fStatus==="진행중" && r.contract) return false;
+    if(fMonth && r.date.slice(0,7)!==fMonth) return false;
+    if(qq){ const hay=(r.clinic+" "+r.addr+" "+r.dealer+" "+r.note+" "+r.product).toLowerCase();
+      if(!hay.includes(qq)) return false; }
+    return true;
+  }).sort((a,b)=> (sortDesc? b.date.localeCompare(a.date) : a.date.localeCompare(b.date)) || (a.clinic).localeCompare(b.clinic));
+}
+function fmtDate(d){ if(!d)return""; const dt=new Date(d+"T00:00:00"); const w=["일","월","화","수","목","금","토"][dt.getDay()];
+  return `${d.slice(5,7)}.${d.slice(8,10)} (${w})`; }
+
+function renderList(){
+  const rows=filtered();
+  const monthLabel = fMonth?`${fMonth.slice(0,4)}년 ${+fMonth.slice(5,7)}월`:"";
+  const active = fTypes.length||fPerson!=="전체"||fStatus!=="전체"||q||fMonth;
+  document.getElementById("listMeta").innerHTML=`<b class="tnum" style="color:var(--ink)">${rows.length}건</b>`
+    +(monthLabel?` · <b style="color:var(--medit)">${monthLabel}</b>`:"")
+    +` <button class="sort-btn" onclick="toggleSort()">${sortDesc?'최신순 ↓':'오래된순 ↑'}</button>`
+    +(active?` <button class="clr-btn" onclick="clearFilters()">필터 해제 ✕</button>`:"");
+  const el=document.getElementById("vlist");
+  if(!rows.length){ el.innerHTML=`<div class="empty">
+    <svg width="46" height="46" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="20" cy="20" r="15"/><path d="m32 32 8 8M14 20h12M20 14v12" opacity=".5"/></svg>
+    <p>검색 결과가 없어요</p><p class="s">필터를 바꾸거나 새 방문을 추가해 보세요</p></div>`; return; }
+  el.innerHTML=rows.map(r=>{
+    const t=typeMeta(r.type);
+    const prods=prodList(r.product).map(p=>`<span class="tag prod">${esc(p)}</span>`).join("");
+    const deal=r.contract?`<span class="tag deal">✓ ${esc(r.contract)}</span>`:"";
+    const av=`<span class="av" style="background:${PERSON_COLOR[r.person]||'#5b6b69'}">${esc((r.person||'?').slice(-2,-1))}</span>`;
+    return `<div class="vcard" style="--acc:${t.c}" onclick="openEdit('${r.id}')">
+      <div class="vc-top">
+        <span class="badge" style="color:${t.c};background:${t.bg}">${esc(r.type)}</span>
+        ${deal}
+        <span class="vc-date tnum">${fmtDate(r.date)}</span>
+      </div>
+      <div class="vc-name">${esc(r.clinic)}</div>
+      ${r.addr?`<a class="vc-addr" href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(r.addr)}" target="_blank" rel="noopener" onclick="event.stopPropagation()"><svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5.5c0 3.5-4.5 6.5-4.5 6.5S2 8.9 2 5.5a4.5 4.5 0 0 1 9 0Z"/><circle cx="6.5" cy="5.3" r="1.4"/></svg>${esc(r.addr)}<span class="map-go">지도 ›</span></a>`:""}
+      <div class="vc-meta">
+        <span class="tag person">${av}${esc(r.person)}</span>
+        ${prods}
+      </div>
+      ${r.dealer?`<div class="vc-dealer">🤝 ${esc(r.dealer)}</div>`:""}
+      ${r.note?`<div class="vc-note">${esc(r.note)}</div>`:""}
+    </div>`;
+  }).join("");
+}
+
+/* ============ SHEET (add / edit) ============ */
+const sheet=document.getElementById("sheet"), scrim=document.getElementById("scrim");
+function openSheet(){scrim.classList.add("show");sheet.classList.add("show");}
+function closeSheet(){scrim.classList.remove("show");sheet.classList.remove("show");}
+
+function buildForm(r){
+  r=r||{type:"1차 설치교육",date:new Date().toISOString().slice(0,10),person:"이주호",clinic:"",addr:"",dealer:"",product:"",contract:"",sn:"",note:""};
+  selProducts=prodList(r.product);
+  document.getElementById("sheetBody").innerHTML=`
+    <div class="field"><label>구분 <span class="req">*</span></label>
+      <div class="seg" id="fType">${TYPES.map(t=>`<button type="button" class="seg-opt ${r.type===t.k?'on':''}" style="${r.type===t.k?`background:${t.c}`:''}" data-v="${t.k}" data-c="${t.c}" onclick="pickSeg(this,'type')">${t.k}</button>`).join("")}</div>
+    </div>
+    <div class="field"><label>방문일자 <span class="req">*</span></label>
+      <input class="inp" type="date" id="fDate" value="${r.date}"></div>
+    <div class="field"><label>담당자 <span class="req">*</span></label>
+      <div class="seg seg-2" id="fPersonSeg">${PEOPLE.map(p=>`<button type="button" class="seg-opt ${r.person===p?'on':''}" style="${r.person===p?`background:${PERSON_COLOR[p]}`:''}" data-v="${p}" data-c="${PERSON_COLOR[p]}" onclick="pickSeg(this,'person')">${p}</button>`).join("")}</div>
+    </div>
+    <div class="field"><label>치과명 <span class="req">*</span></label>
+      <input class="inp" id="fClinic" placeholder="예) 경주 바른이치과" value="${esc(r.clinic)}"></div>
+    <div class="field"><label>주소</label>
+      <input class="inp" id="fAddr" placeholder="예) 경북 경주시 화랑로 107 3층" value="${esc(r.addr)}"></div>
+    <div class="field"><label>딜러사 (담당자)</label>
+      <input class="inp" id="fDealer" placeholder="예) 티에네스 (박노우 차장)" value="${esc(r.dealer)}"></div>
+    <div class="field"><label>제품</label>
+      <div class="chips-pick" id="fProd">${PRODUCTS.map(p=>`<button type="button" class="pk ${selProducts.includes(p)?'on':''}" data-v="${p}" onclick="pickProd(this)">${p}</button>`).join("")}</div>
+    </div>
+    <div class="field"><label>계약 상태</label>
+      <div class="seg seg-2"><button type="button" class="seg-opt ${r.contract?'on':''}" style="${r.contract?'background:#15803d':''}" onclick="setContract(this,true)">✓ 계약완료</button><button type="button" class="seg-opt ${!r.contract?'on':''}" style="${!r.contract?'background:#5b6b69':''}" onclick="setContract(this,false)">진행 중</button></div>
+    </div>
+    <div class="field" id="fSNwrap" style="${r.contract?'':'display:none'}"><label>SN / 설치 일정</label>
+      <input class="inp" id="fSN" placeholder="예) 7/14(화) 설치 교육" value="${esc(r.sn)}"></div>
+    <div class="field"><label>방문 후 공유사항</label>
+      <textarea class="inp" id="fNote" placeholder="방문 결과, 요청사항, 다음 단계 등">${esc(r.note)}</textarea></div>
+  `;
+  // hidden state holders
+  form.type=r.type; form.person=r.person; form.contract=!!r.contract;
+}
+const form={type:"1차 설치교육",person:"이주호",contract:false};
+function pickSeg(btn,which){
+  btn.parentElement.querySelectorAll(".seg-opt").forEach(b=>{b.classList.remove("on");b.style.background="";});
+  btn.classList.add("on");btn.style.background=btn.dataset.c;
+  form[which]=btn.dataset.v;
+}
+function pickProd(btn){
+  const v=btn.dataset.v;
+  if(selProducts.includes(v)){selProducts=selProducts.filter(x=>x!==v);btn.classList.remove("on");}
+  else{selProducts.push(v);btn.classList.add("on");}
+}
+function setContract(btn,val){
+  btn.parentElement.querySelectorAll(".seg-opt").forEach(b=>{b.classList.remove("on");b.style.background="";});
+  btn.classList.add("on");btn.style.background=val?"#15803d":"#5b6b69";
+  form.contract=val;
+  document.getElementById("fSNwrap").style.display=val?"":"none";
+}
+
+function openAdd(){
+  editId=null;
+  document.getElementById("sheetTitle").textContent="방문 추가";
+  buildForm(null);
+  document.getElementById("sheetFoot").innerHTML=`
+    <button class="btn btn-ghost" onclick="closeSheet()">취소</button>
+    <button class="btn btn-primary" onclick="saveForm()">저장</button>`;
+  openSheet();
+}
+function openEdit(id){
+  const r=DATA.find(x=>x.id===id); if(!r)return;
+  editId=id;
+  document.getElementById("sheetTitle").textContent="방문 상세 · 편집";
+  buildForm(r);
+  document.getElementById("sheetFoot").innerHTML=`
+    <button class="btn btn-danger" onclick="delRow('${id}')">삭제</button>
+    <button class="btn btn-ghost" onclick="closeSheet()">취소</button>
+    <button class="btn btn-primary" onclick="saveForm()">저장</button>`;
+  openSheet();
+}
+function saveForm(){
+  const clinic=document.getElementById("fClinic").value.trim();
+  if(!clinic){toast("치과명을 입력해 주세요");return;}
+  const obj={
+    type:form.type,
+    date:document.getElementById("fDate").value,
+    person:form.person,
+    clinic,
+    addr:document.getElementById("fAddr").value.trim(),
+    dealer:document.getElementById("fDealer").value.trim(),
+    product:selProducts.join(", "),
+    contract:form.contract?((editId&&(DATA.find(x=>x.id===editId)||{}).contract)||"계약완료"):"",
+    sn:form.contract?document.getElementById("fSN").value.trim():"",
+    note:document.getElementById("fNote").value.trim(),
+  };
+  if(editId){ const i=DATA.findIndex(x=>x.id===editId); DATA[i]={...DATA[i],...obj}; toast("수정했어요"); }
+  else{ DATA.push({id:uid(),...obj}); toast("방문을 추가했어요"); }
+  save(); closeSheet(); renderAll();
+}
+function delRow(id){
+  DATA=DATA.filter(x=>x.id!==id); save(); closeSheet(); renderAll(); toast("삭제했어요");
+}
+
+/* ============ DATA VIEW ============ */
+function renderData(){
+  document.getElementById("dataCount").textContent=DATA.length;
+  document.getElementById("dataSaved").textContent=(store.ok?"마지막 저장: "+(savedAt||"—"):"⚠ 이 환경에서는 자동저장이 제한됩니다. 내보내기로 백업하세요.");
+}
+function download(name,content,type){
+  const blob=new Blob([content],{type});const url=URL.createObjectURL(blob);
+  const a=document.createElement("a");a.href=url;a.download=name;a.click();
+  setTimeout(()=>URL.revokeObjectURL(url),1000);
+}
+/* ---- 원본 서식 그대로 .xlsx 내보내기 ---- */
+function loadXLSXlib(){
+  return new Promise((res,rej)=>{
+    if(window.XLSX && window.XLSX.utils){res(window.XLSX);return;}
+    const urls=[
+      "https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.bundle.js",
+      "https://unpkg.com/xlsx-js-style@1.2.0/dist/xlsx.bundle.js"
+    ];
+    let i=0;
+    (function next(){
+      if(i>=urls.length){rej(new Error("cdn"));return;}
+      const s=document.createElement("script");s.src=urls[i++];
+      s.onload=()=>window.XLSX?res(window.XLSX):next();
+      s.onerror=next;
+      document.head.appendChild(s);
+    })();
+  });
+}
+function fmtDateX(d){const dt=new Date(d+"T00:00:00");const w=["일","월","화","수","목","금","토"][dt.getDay()];return `${d.slice(2,4)}.${d.slice(5,7)}.${d.slice(8,10)}(${w})`;}
+async function exportXLSX(){
+  toast("엑셀 파일 생성 중…");
+  let X;
+  try{ X=await loadXLSXlib(); }
+  catch(e){ toast("인터넷 연결이 필요해요. 오프라인은 CSV를 이용하세요"); return; }
+  const HEAD=["구분","방문일자","담당자","치과명","주소","딜러사(담당자)","제품","계약","SN","방문 후 공유사항"];
+  const F="맑은 고딕";
+  const thin={style:"thin",color:{rgb:"B0B7BD"}};
+  const bAll={top:thin,bottom:thin,left:thin,right:thin};
+  const rows=DATA.slice().sort((a,b)=>a.date.localeCompare(b.date)||a.clinic.localeCompare(b.clinic));
+  const ws={}, merges=[];
+  const set=(r,c,v,s)=>{ws[X.utils.encode_cell({r,c})]={v:(v==null?"":v),t:"s",s:s||{}};};
+  // 1행: 노란 제목 배너
+  const years=[...new Set(rows.map(r=>r.date.slice(0,4)))].sort().join(", ");
+  set(0,0,`${years}년도 End-user 방문 내역`,
+    {fill:{fgColor:{rgb:"FFFF00"}},font:{name:F,bold:true,sz:18},alignment:{horizontal:"center",vertical:"center"},border:bAll});
+  for(let c=1;c<10;c++) set(0,c,"",{fill:{fgColor:{rgb:"FFFF00"}},border:bAll});
+  merges.push({s:{r:0,c:0},e:{r:0,c:9}});
+  // 2행: 컬럼 헤더
+  let R=1;
+  HEAD.forEach((h,c)=>set(R,c,h,
+    {font:{name:F,bold:true,sz:11},alignment:{horizontal:"center",vertical:"center"},border:bAll,fill:{fgColor:{rgb:"F2F2F2"}}}));
+  R++;
+  // 데이터: 월 구분 행(노랑 배경·빨강 글씨) + 데모교육 연두 행 + 계약완료 빨강
+  let lastMonth="";
+  rows.forEach(r=>{
+    const mon=r.date.slice(0,7);
+    if(mon!==lastMonth){
+      lastMonth=mon;
+      set(R,0,`${mon.slice(0,4)}년도 ${+mon.slice(5,7)}월`,
+        {fill:{fgColor:{rgb:"FFFF00"}},font:{name:F,bold:true,sz:12,color:{rgb:"FF0000"}},alignment:{vertical:"center"},border:bAll});
+      for(let c=1;c<10;c++) set(R,c,"",{fill:{fgColor:{rgb:"FFFF00"}},border:bAll});
+      merges.push({s:{r:R,c:0},e:{r:R,c:9}});
+      R++;
+    }
+    const demo=r.type==="데모교육";
+    const vals=[r.type,fmtDateX(r.date),r.person,r.clinic,r.addr,r.dealer,r.product,r.contract,r.sn,r.note];
+    vals.forEach((v,c)=>{
+      const s={font:{name:F,sz:10},alignment:{vertical:"top",wrapText:true},border:bAll};
+      if(demo) s.fill={fgColor:{rgb:"E2EFDA"}};
+      if(c===7 && r.contract) s.font={name:F,sz:10,bold:true,color:{rgb:"FF0000"}};
+      set(R,c,v,s);
+    });
+    R++;
+  });
+  ws["!ref"]=X.utils.encode_range({s:{r:0,c:0},e:{r:R-1,c:9}});
+  ws["!merges"]=merges;
+  ws["!cols"]=[{wch:11},{wch:13},{wch:8},{wch:20},{wch:38},{wch:20},{wch:14},{wch:9},{wch:15},{wch:50}];
+  ws["!rows"]=[{hpt:28},{hpt:20}];
+  const name="End-user 방문 리스트";
+  X.writeFile({SheetNames:[name],Sheets:{[name]:ws}},"고객방문관리_"+new Date().toISOString().slice(0,10)+".xlsx");
+  toast("원본 서식 그대로 엑셀로 내보냈어요");
+}
+function exportCSV(){
+  const head=["구분","방문일자","담당자","치과명","주소","딜러사(담당자)","제품","계약","SN","방문 후 공유사항"];
+  const esc2=s=>`"${String(s||"").replace(/"/g,'""')}"`;
+  const rows=DATA.slice().sort((a,b)=>a.date.localeCompare(b.date));
+  const csv=[head.map(esc2).join(",")].concat(rows.map(r=>[r.type,r.date,r.person,r.clinic,r.addr,r.dealer,r.product,r.contract,r.sn,r.note].map(esc2).join(","))).join("\r\n");
+  download("고객방문관리_"+new Date().toISOString().slice(0,10)+".csv","﻿"+csv,"text/csv;charset=utf-8");
+  toast("CSV로 내보냈어요");
+}
+function exportJSON(){
+  download("고객방문관리_백업_"+new Date().toISOString().slice(0,10)+".json",JSON.stringify({rows:DATA,exportedAt:new Date().toISOString()},null,2),"application/json");
+  toast("백업 파일을 저장했어요");
+}
+function importJSON(e){
+  const f=e.target.files[0]; if(!f)return;
+  const rd=new FileReader();
+  rd.onload=()=>{ try{ const p=JSON.parse(rd.result); const rows=p.rows||p;
+    if(!Array.isArray(rows))throw 0;
+    DATA=rows.map(r=>({id:r.id||uid(),type:r.type||"기타",date:r.date||"",person:r.person||"",clinic:r.clinic||"",addr:r.addr||"",dealer:r.dealer||"",product:r.product||"",contract:r.contract||"",sn:r.sn||"",note:r.note||""}));
+    save();renderAll();toast(rows.length+"건을 불러왔어요");
+  }catch(err){toast("파일을 읽을 수 없어요");} };
+  rd.readAsText(f); e.target.value="";
+}
+function resetSeed(){ DATA=seedToObj(); save(); renderAll(); toast("샘플 데이터로 초기화했어요"); }
+
+/* ============ NAV & INIT ============ */
+function switchView(v){
+  document.querySelectorAll(".view").forEach(s=>s.classList.remove("active"));
+  document.getElementById("view-"+v).classList.add("active");
+  document.querySelectorAll(".tab").forEach(t=>t.classList.toggle("on",t.dataset.view===v));
+  document.getElementById("fab").style.display=(v==="data")?"none":"grid";
+  window.scrollTo(0,0);
+}
+document.querySelectorAll(".tab").forEach(t=>t.onclick=()=>switchView(t.dataset.view));
+document.getElementById("fab").onclick=openAdd;
+document.getElementById("sheetClose").onclick=closeSheet;
+scrim.onclick=closeSheet;
+document.getElementById("search").oninput=e=>{q=e.target.value;renderList();};
+
+let toastT;
+function toast(msg){const el=document.getElementById("toast");el.textContent=msg;el.classList.add("show");clearTimeout(toastT);toastT=setTimeout(()=>el.classList.remove("show"),1900);}
+
+function renderAll(){renderDash();renderFilters();renderList();renderData();}
+load();renderAll();
+</script>
+</body>
+</html>
